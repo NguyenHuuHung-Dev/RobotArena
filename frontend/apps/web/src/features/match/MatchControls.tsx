@@ -19,14 +19,15 @@ export const MatchControls: React.FC<MatchControlsProps> = ({
     status,
     playbackSpeed,
     currentTick,
-    mazeSize,
+    mazeCols,
+    mazeRows,
     goalPosition,
     smoothCorners,
     algorithmsList,
     activeAlgorithms,
     setStatus,
     setPlaybackSpeed,
-    setMazeSize,
+    setMazeDimensions,
     setGoalPosition,
     setSmoothCorners,
     toggleAlgorithm,
@@ -41,12 +42,17 @@ export const MatchControls: React.FC<MatchControlsProps> = ({
   };
 
   const speeds = [0.5, 1, 2, 4];
-  const mazeSizes = [15, 21, 31];
+  const mazePresets = [
+    { label: '29×17 RỘNG', cols: 29, rows: 17 },
+    { label: '35×21 LỚN', cols: 35, rows: 21 },
+    { label: '23×13 GỌN', cols: 23, rows: 13 },
+    { label: '21×21 VUÔNG', cols: 21, rows: 21 },
+  ];
 
   return (
     <div className="space-y-3 font-sans">
       {/* Primary Action Row - Sharp Square Minimalist Styling */}
-      <div className="border border-black bg-white p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="border border-black bg-white p-2.5 flex flex-wrap items-center justify-between gap-2.5 text-xs">
         {/* Playback Controls */}
         <div className="flex items-center gap-2">
           <button
@@ -87,32 +93,35 @@ export const MatchControls: React.FC<MatchControlsProps> = ({
           {/* Prominent Add Algorithm Button */}
           <button
             onClick={onOpenAddAlgo}
-            className="px-4 py-2 font-mono font-bold border-2 border-rose-600 text-rose-600 hover:bg-rose-600 hover:text-white transition tracking-wide"
+            className="px-3.5 py-2 font-mono font-bold border-2 border-rose-600 text-rose-600 hover:bg-rose-600 hover:text-white transition tracking-wide"
           >
             + THÊM THUẬT TOÁN
           </button>
         </div>
 
         {/* Options Row */}
-        <div className="flex flex-wrap items-center gap-3 font-mono">
-          {/* Maze Grid Size */}
+        <div className="flex flex-wrap items-center gap-2.5 font-mono">
+          {/* Maze Grid Size / Preset */}
           <div className="flex items-center border border-black">
             <span className="px-2 py-1 bg-neutral-100 text-neutral-600 border-r border-black font-semibold text-[11px]">
               KÍCH THƯỚC:
             </span>
-            {mazeSizes.map((size) => (
-              <button
-                key={size}
-                onClick={() => setMazeSize(size)}
-                className={`px-2.5 py-1 text-xs transition-colors ${
-                  mazeSize === size
-                    ? 'bg-black text-white font-bold'
-                    : 'bg-white text-black hover:bg-neutral-100'
-                }`}
-              >
-                {size}×{size}
-              </button>
-            ))}
+            {mazePresets.map((preset) => {
+              const isSelected = mazeCols === preset.cols && mazeRows === preset.rows;
+              return (
+                <button
+                  key={preset.label}
+                  onClick={() => setMazeDimensions(preset.cols, preset.rows)}
+                  className={`px-2 py-1 text-xs transition-colors ${
+                    isSelected
+                      ? 'bg-black text-white font-bold'
+                      : 'bg-white text-black hover:bg-neutral-100'
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Goal Position Selector */}

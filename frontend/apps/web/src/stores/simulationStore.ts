@@ -129,7 +129,9 @@ interface MazeRaceStoreState {
   playbackSpeed: number; // 0.5, 1, 2, 4
   tickData: MazeSimulationTick | null;
   selectedRobotId: string | null;
-  mazeSize: number; // 15, 21, 31
+  mazeSize: number; // 15, 21, 31 (backward compatibility)
+  mazeCols: number; // e.g. 29
+  mazeRows: number; // e.g. 17
   goalPosition: 'center' | 'bottom-right' | 'top-right' | 'bottom-left' | 'random' | 'corner';
   braidFactor: number;
   smoothCorners: boolean;
@@ -144,6 +146,7 @@ interface MazeRaceStoreState {
   setPlaybackSpeed: (speed: number) => void;
   setSelectedRobotId: (id: string | null) => void;
   setMazeSize: (size: number) => void;
+  setMazeDimensions: (cols: number, rows: number) => void;
   setGoalPosition: (pos: 'center' | 'bottom-right' | 'top-right' | 'bottom-left' | 'random' | 'corner') => void;
   setBraidFactor: (factor: number) => void;
   setSmoothCorners: (smooth: boolean) => void;
@@ -189,6 +192,8 @@ export const useSimulationStore = create<MazeRaceStoreState>((set) => ({
   tickData: null,
   selectedRobotId: 'turn_astar',
   mazeSize: 21,
+  mazeCols: 29, // 29 cols x 17 rows: Tỷ lệ rộng ~1.7:1 chuẩn màn hình ngang widescreen
+  mazeRows: 17,
   goalPosition: 'center', // Đích ở giữa theo chuẩn Micromouse
   braidFactor: 0.3, // 30% vòng lặp và đường nhánh phong phú
   smoothCorners: true,
@@ -206,7 +211,8 @@ export const useSimulationStore = create<MazeRaceStoreState>((set) => ({
   setStatus: (status) => set({ status }),
   setPlaybackSpeed: (playbackSpeed) => set({ playbackSpeed }),
   setSelectedRobotId: (selectedRobotId) => set({ selectedRobotId }),
-  setMazeSize: (mazeSize) => set({ mazeSize }),
+  setMazeSize: (mazeSize) => set({ mazeSize, mazeCols: mazeSize, mazeRows: mazeSize }),
+  setMazeDimensions: (mazeCols, mazeRows) => set({ mazeCols, mazeRows, mazeSize: Math.max(mazeCols, mazeRows) }),
   setGoalPosition: (goalPosition) => set({ goalPosition }),
   setBraidFactor: (braidFactor) => set({ braidFactor }),
   setSmoothCorners: (smoothCorners) => set({ smoothCorners }),
