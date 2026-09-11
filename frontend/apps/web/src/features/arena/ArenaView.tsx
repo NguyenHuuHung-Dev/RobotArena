@@ -115,13 +115,13 @@ export const ArenaView: React.FC = () => {
           <div className="flex items-center gap-2 mb-2 text-[11px] font-mono tracking-widest uppercase text-neutral-500">
             <span>MÔ PHỎNG THI ĐẤU</span>
             <span>·</span>
-            <span>TÌM ĐƯỜNG TỐI ƯU</span>
+            <span className="text-amber-600 font-bold">KHÁM PHÁ MÙ (ZERO-KNOWLEDGE)</span>
             <span>·</span>
-            <span>GIẢM THIỂU GÓC CUA</span>
+            <span>QUAY LUI VẬT LÝ KHI GẶP NGÕ CỤT</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-black font-sans">
             Đấu trường Mê cung.
-            <span className="block text-neutral-400 font-serif italic font-normal">Một đường đi ngắn nhất.</span>
+            <span className="block text-neutral-400 font-serif italic font-normal">Chuột không biết trước vị trí đích — tự do thám & tìm kiếm lối thoát.</span>
           </h1>
         </div>
 

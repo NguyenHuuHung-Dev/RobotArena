@@ -11,38 +11,17 @@ import {
   getValidNeighbors,
   getRelativeDirection,
   DIRECTION_OFFSETS,
-  manhattanDistance,
   smoothPathWaypoints,
 } from '@robot-arena/robot-sdk';
 import { generateMaze, GoalPositionSetting } from './mazeGenerator';
 import { AlgorithmDefinition } from '../stores/simulationStore';
 
 /**
- * Helper: Tạo bản đồ tường bộ nhớ trống (chỉ có tường biên ngoài).
- */
-function createEmptyMemoryWalls(rows: number, cols: number) {
-  const walls: Array<Array<{ north: boolean; east: boolean; south: boolean; west: boolean }>> = [];
-  for (let r = 0; r < rows; r++) {
-    const row = [];
-    for (let c = 0; c < cols; c++) {
-      row.push({
-        north: r === 0,
-        east: c === cols - 1,
-        south: r === rows - 1,
-        west: c === 0,
-      });
-    }
-    walls.push(row);
-  }
-  return walls;
-}
-
-/**
- * 1. REAL MICROMOUSE FLOOD FILL:
- * Thuật toán kinh điển giải Micromouse chuẩn IEEE.
- * Chuột chỉ biết vị trí ô hiện tại và ô Đích. Khi đi đến đâu cảm biến nhận diện tường đến đó,
- * cập nhật ma trận thế năng (Flood Fill distance matrix).
- * Khi gặp ngõ cụt, thế năng ô ngõ cụt dâng cao hơn ô lối vào -> chuột tự quay đầu 180° quay lui ra ngoài!
+ * 1. REAL MICROMOUSE FRONTIER FLOOD FILL (Khám phá mù - Không biết vị trí đích):
+ * Thuật toán dội thế năng theo chuẩn Micromouse giai đoạn thám hiểm (Search Phase).
+ * Chuột hoàn toàn KHÔNG biết trước tọa độ ô Đích.
+ * Thế năng dội ngược từ tất cả các lối rẽ/vùng đất chưa khám phá (Unexplored Frontiers).
+ * Chuột bị hút tự nhiên về các vùng đất mới. Khi vào ngõ cụt, thế năng dâng cao đẩy chuột trôi ra ngoài!
  */
 export function simulateRealMicromouseFloodFill(
   maze: MazeGrid,
@@ -51,131 +30,53 @@ export function simulateRealMicromouseFloodFill(
 ): GridPosition[] {
   const rows = maze.rows;
   const cols = maze.cols;
-  const memoryWalls = createEmptyMemoryWalls(rows, cols);
-
-  // Ma trận khoảng cách thực tế từ mọi ô tới đích trên các bức tường đã biết
-  const dist: number[][] = Array.from({ length: rows }, () => Array(cols).fill(Infinity));
-
-  const getOpenNeighbors = (p: GridPosition): GridPosition[] => {
-    const res: GridPosition[] = [];
-    const w = memoryWalls[p.row][p.col];
-    if (!w.north && p.row > 0) res.push({ row: p.row - 1, col: p.col });
-    if (!w.east && p.col < cols - 1) res.push({ row: p.row, col: p.col + 1 });
-    if (!w.south && p.row < rows - 1) res.push({ row: p.row + 1, col: p.col });
-    if (!w.west && p.col > 0) res.push({ row: p.row, col: p.col - 1 });
-    return res;
-  };
-
-  // Cập nhật ma trận thế năng Flood Fill toàn diện từ đích
-  const recomputeFloodFill = () => {
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        dist[r][c] = Infinity;
-      }
-    }
-    dist[goal.row][goal.col] = 0;
-    const q: GridPosition[] = [goal];
-    let head = 0;
-    while (head < q.length) {
-      const curr = q[head++];
-      const d = dist[curr.row][curr.col];
-      const neighbors = getOpenNeighbors(curr);
-      for (const n of neighbors) {
-        if (dist[n.row][n.col] === Infinity) {
-          dist[n.row][n.col] = d + 1;
-          q.push(n);
-        }
-      }
-    }
-  };
-
-  recomputeFloodFill();
-
+  const visited = new Set<string>([`${start.row},${start.col}`]);
+  const visitCounts = new Map<string, number>([[`${start.row},${start.col}`, 1]]);
   const path: GridPosition[] = [start];
   let current: GridPosition = { ...start };
   let heading: Direction = 'EAST';
-  const visitCounts = new Map<string, number>();
-  visitCounts.set(`${start.row},${start.col}`, 1);
-  const maxSteps = rows * cols * 6;
+  const maxSteps = rows * cols * 8;
 
   for (let step = 0; step < maxSteps; step++) {
+    // Chỉ dừng lại khi chuột thực sự bước chân tới đúng ô Đích!
     if (current.row === goal.row && current.col === goal.col) break;
 
-    // 1. Cảm biến nhận diện tường thực tế
-    const actualCell = maze.cells[current.row][current.col];
-    let wallChanged = false;
+    const neighbors = getValidNeighbors(maze, current);
+    const unvisited = neighbors.filter((n) => !visited.has(`${n.row},${n.col}`));
 
-    if (actualCell.walls.north && !memoryWalls[current.row][current.col].north) {
-      memoryWalls[current.row][current.col].north = true;
-      if (current.row > 0) memoryWalls[current.row - 1][current.col].south = true;
-      wallChanged = true;
-    }
-    if (actualCell.walls.east && !memoryWalls[current.row][current.col].east) {
-      memoryWalls[current.row][current.col].east = true;
-      if (current.col < cols - 1) memoryWalls[current.row][current.col + 1].west = true;
-      wallChanged = true;
-    }
-    if (actualCell.walls.south && !memoryWalls[current.row][current.col].south) {
-      memoryWalls[current.row][current.col].south = true;
-      if (current.row < rows - 1) memoryWalls[current.row + 1][current.col].north = true;
-      wallChanged = true;
-    }
-    if (actualCell.walls.west && !memoryWalls[current.row][current.col].west) {
-      memoryWalls[current.row][current.col].west = true;
-      if (current.col > 0) memoryWalls[current.row][current.col - 1].east = true;
-      wallChanged = true;
-    }
-
-    // 2. Cập nhật thế năng nếu có tường mới
-    if (wallChanged) {
-      recomputeFloodFill();
-    }
-
-    // 3. Chọn ô láng giềng có thế năng thấp nhất
-    const neighbors = getOpenNeighbors(current);
-    if (neighbors.length === 0) break;
-
-    let minVal = Infinity;
-    for (const n of neighbors) {
-      if (dist[n.row][n.col] < minVal) {
-        minVal = dist[n.row][n.col];
-      }
-    }
-
-    // Nếu các ô đều bị cô lập (dist = Infinity), fallback theo Manhattan
-    if (minVal === Infinity) {
-      neighbors.sort((a, b) => manhattanDistance(a, goal) - manhattanDistance(b, goal));
-      const chosen = neighbors[0];
-      const nextDir = getRelativeDirection(current, chosen);
+    if (unvisited.length > 0) {
+      // Ưu tiên đi thẳng theo dòng chảy quán tính
+      unvisited.sort((a, b) => {
+        const straightA = getRelativeDirection(current, a) === heading ? -1 : 0;
+        const straightB = getRelativeDirection(current, b) === heading ? -1 : 0;
+        return straightA - straightB;
+      });
+      const next = unvisited[0];
+      visited.add(`${next.row},${next.col}`);
+      visitCounts.set(`${next.row},${next.col}`, 1);
+      const nextDir = getRelativeDirection(current, next);
       if (nextDir) heading = nextDir;
-      current = { ...chosen };
-      visitCounts.set(`${current.row},${current.col}`, (visitCounts.get(`${current.row},${current.col}`) || 0) + 1);
+      current = { ...next };
       path.push(current);
-      continue;
+    } else {
+      // Dâng thế năng: Chọn ô có số lần thăm ít nhất để tự trôi ra khỏi ngõ cụt
+      neighbors.sort((a, b) => {
+        const cA = visitCounts.get(`${a.row},${a.col}`) || 0;
+        const cB = visitCounts.get(`${b.row},${b.col}`) || 0;
+        if (cA !== cB) return cA - cB;
+        const backDir = heading === 'NORTH' ? 'SOUTH' : heading === 'SOUTH' ? 'NORTH' : heading === 'EAST' ? 'WEST' : 'EAST';
+        const isBackA = getRelativeDirection(current, a) === backDir ? 1 : 0;
+        const isBackB = getRelativeDirection(current, b) === backDir ? 1 : 0;
+        return isBackA - isBackB;
+      });
+
+      const next = neighbors[0];
+      visitCounts.set(`${next.row},${next.col}`, (visitCounts.get(`${next.row},${next.col}`) || 0) + 1);
+      const nextDir = getRelativeDirection(current, next);
+      if (nextDir) heading = nextDir;
+      current = { ...next };
+      path.push(current);
     }
-
-    const candidates = neighbors.filter((n) => dist[n.row][n.col] === minVal);
-
-    // Tiêu chuẩn chọn ô tốt nhất:
-    // 1. Ô có số lần ghé thăm ít nhất (TRIỆT TIÊU HOÀN TOÀN DAO ĐỘNG QUA LẠI!)
-    // 2. Ô cùng hướng đi thẳng hiện tại (giảm bẻ cua)
-    candidates.sort((a, b) => {
-      const visitsA = visitCounts.get(`${a.row},${a.col}`) || 0;
-      const visitsB = visitCounts.get(`${b.row},${b.col}`) || 0;
-      if (visitsA !== visitsB) return visitsA - visitsB;
-
-      const straightA = getRelativeDirection(current, a) === heading ? -1 : 0;
-      const straightB = getRelativeDirection(current, b) === heading ? -1 : 0;
-      return straightA - straightB;
-    });
-
-    const chosen = candidates[0];
-    const nextHeading = getRelativeDirection(current, chosen);
-    if (nextHeading) heading = nextHeading;
-
-    current = { ...chosen };
-    visitCounts.set(`${current.row},${current.col}`, (visitCounts.get(`${current.row},${current.col}`) || 0) + 1);
-    path.push(current);
   }
 
   return path;
@@ -304,9 +205,9 @@ export function simulateRealWallFollower(
 }
 
 /**
- * 4. REAL GREEDY BEST-FIRST SEARCH (GBFS):
- * Lao thẳng về hướng đích dựa hoàn toàn trên hàm heuristic h(n) = Manhattan, bỏ qua số bước đã đi g(n).
- * Khi gặp ngõ cụt thì quay lui vật lý về ngã ba trước đó.
+ * 4. REAL GREEDY EXPLORER (Khám phá mù tham lam):
+ * Lao vào các ngã rẽ mới nhất phát hiện được, không cần biết trước đích ở đâu.
+ * Khi đụng ngõ cụt thì quay lui vật lý về ngã ba trước đó.
  */
 export function simulateRealGreedyBFS(
   maze: MazeGrid,
@@ -321,7 +222,7 @@ export function simulateRealGreedyBFS(
   let current: GridPosition = { ...start };
   let heading: Direction = 'EAST';
 
-  const maxSteps = rows * cols * 6;
+  const maxSteps = rows * cols * 8;
 
   for (let step = 0; step < maxSteps; step++) {
     if (current.row === goal.row && current.col === goal.col) break;
@@ -330,12 +231,10 @@ export function simulateRealGreedyBFS(
     const unvisited = neighbors.filter((n) => !visited.has(`${n.row},${n.col}`));
 
     if (unvisited.length > 0) {
+      // Ưu tiên khám phá các nhánh rẽ tạo góc cua mới để quét diện tích nhanh nhất
       unvisited.sort((a, b) => {
-        const distA = manhattanDistance(a, goal);
-        const distB = manhattanDistance(b, goal);
-        if (distA !== distB) return distA - distB;
-        const straightA = getRelativeDirection(current, a) === heading ? -0.5 : 0;
-        const straightB = getRelativeDirection(current, b) === heading ? -0.5 : 0;
+        const straightA = getRelativeDirection(current, a) === heading ? 1 : 0;
+        const straightB = getRelativeDirection(current, b) === heading ? 1 : 0;
         return straightA - straightB;
       });
 
@@ -365,8 +264,9 @@ export function simulateRealGreedyBFS(
 }
 
 /**
- * 5. REAL ONLINE DIJKSTRA (Khám phá đồng nhất - Uniform Cost):
- * Quét lan tỏa hình cầu đẳng hướng không dùng hàm heuristic định hướng (h(n) = 0).
+ * 5. REAL ONLINE DIJKSTRA (Khám phá biên toàn diện - Frontier Dijkstra SLAM):
+ * Robot quét bản đồ và lập đường đi ngắn nhất đến ô CHƯA KHÁM PHÁ gần nhất (Frontier).
+ * Hoàn toàn không biết trước tọa độ ô Đích.
  */
 export function simulateRealDijkstra(
   maze: MazeGrid,
@@ -375,38 +275,44 @@ export function simulateRealDijkstra(
 ): GridPosition[] {
   const rows = maze.rows;
   const cols = maze.cols;
-  const memoryWalls = createEmptyMemoryWalls(rows, cols);
-  const deadEnds = new Set<string>();
-  const visitCounts = new Map<string, number>();
+  const visited = new Set<string>([`${start.row},${start.col}`]);
+  const path: GridPosition[] = [start];
+  let current: GridPosition = { ...start };
+  const maxSteps = rows * cols * 8;
 
-  const solveDijkstraOnKnown = (from: GridPosition, to: GridPosition): GridPosition[] => {
+  // BFS/Dijkstra tìm đường ngắn nhất qua các ô đã thăm để tới ô biên chưa thăm gần nhất
+  const findShortestPathToNearestFrontier = (from: GridPosition): GridPosition[] => {
     const parent = new Map<string, GridPosition | null>();
     const queue: GridPosition[] = [from];
     parent.set(`${from.row},${from.col}`, null);
+    let targetFrontier: GridPosition | null = null;
 
     while (queue.length > 0) {
       const curr = queue.shift()!;
-      if (curr.row === to.row && curr.col === to.col) break;
+      if (!visited.has(`${curr.row},${curr.col}`)) {
+        targetFrontier = curr;
+        break;
+      }
 
-      const w = memoryWalls[curr.row][curr.col];
-      const neighbors: GridPosition[] = [];
-      if (!w.north && curr.row > 0) neighbors.push({ row: curr.row - 1, col: curr.col });
-      if (!w.east && curr.col < cols - 1) neighbors.push({ row: curr.row, col: curr.col + 1 });
-      if (!w.south && curr.row < rows - 1) neighbors.push({ row: curr.row + 1, col: curr.col });
-      if (!w.west && curr.col > 0) neighbors.push({ row: curr.row, col: curr.col - 1 });
-
+      const neighbors = getValidNeighbors(maze, curr);
       for (const n of neighbors) {
         const key = `${n.row},${n.col}`;
-        if (!parent.has(key) && !deadEnds.has(key)) {
+        if (!parent.has(key)) {
           parent.set(key, curr);
-          queue.push(n);
+          if (visited.has(key)) {
+            queue.push(n);
+          } else {
+            targetFrontier = n;
+            queue.length = 0;
+            break;
+          }
         }
       }
     }
 
+    if (!targetFrontier) return [];
     const route: GridPosition[] = [];
-    let cur: GridPosition | null = to;
-    if (!parent.has(`${to.row},${to.col}`)) return [];
+    let cur: GridPosition | null = targetFrontier;
     while (cur) {
       route.push(cur);
       cur = parent.get(`${cur.row},${cur.col}`) || null;
@@ -414,139 +320,40 @@ export function simulateRealDijkstra(
     return route.reverse();
   };
 
-  const pruneDeadEnd = (pos: GridPosition) => {
-    let p: GridPosition | null = pos;
-    while (p && (p.row !== goal.row || p.col !== goal.col) && (p.row !== start.row || p.col !== start.col)) {
-      const w = memoryWalls[p.row][p.col];
-      let openExits: Array<{ next: GridPosition; dir: Direction }> = [];
-      if (!w.north && p.row > 0) openExits.push({ next: { row: p.row - 1, col: p.col }, dir: 'NORTH' });
-      if (!w.east && p.col < cols - 1) openExits.push({ next: { row: p.row, col: p.col + 1 }, dir: 'EAST' });
-      if (!w.south && p.row < rows - 1) openExits.push({ next: { row: p.row + 1, col: p.col }, dir: 'SOUTH' });
-      if (!w.west && p.col > 0) openExits.push({ next: { row: p.row, col: p.col - 1 }, dir: 'WEST' });
+  for (let step = 0; step < maxSteps; step++) {
+    if (current.row === goal.row && current.col === goal.col) break;
 
-      openExits = openExits.filter((e) => !deadEnds.has(`${e.next.row},${e.next.col}`));
+    const neighbors = getValidNeighbors(maze, current);
+    const unvisited = neighbors.filter((n) => !visited.has(`${n.row},${n.col}`));
 
-      if (openExits.length <= 1) {
-        deadEnds.add(`${p.row},${p.col}`);
-        memoryWalls[p.row][p.col] = { north: true, east: true, south: true, west: true };
-        if (openExits.length === 1) {
-          const exit = openExits[0];
-          if (exit.dir === 'NORTH') memoryWalls[exit.next.row][exit.next.col].south = true;
-          else if (exit.dir === 'EAST') memoryWalls[exit.next.row][exit.next.col].west = true;
-          else if (exit.dir === 'SOUTH') memoryWalls[exit.next.row][exit.next.col].north = true;
-          else if (exit.dir === 'WEST') memoryWalls[exit.next.row][exit.next.col].east = true;
-          p = exit.next;
-        } else {
-          p = null;
-        }
+    if (unvisited.length > 0) {
+      const next = unvisited[0];
+      visited.add(`${next.row},${next.col}`);
+      current = { ...next };
+      path.push(current);
+    } else {
+      const routeToFrontier = findShortestPathToNearestFrontier(current);
+      if (routeToFrontier.length > 1) {
+        const next = routeToFrontier[1];
+        visited.add(`${next.row},${next.col}`);
+        current = { ...next };
+        path.push(current);
       } else {
         break;
       }
     }
-  };
-
-  const path: GridPosition[] = [start];
-  let current: GridPosition = { ...start };
-  visitCounts.set(`${start.row},${start.col}`, 1);
-  const maxSteps = rows * cols * 6;
-
-  for (let step = 0; step < maxSteps; step++) {
-    if (current.row === goal.row && current.col === goal.col) break;
-
-    const actualCell = maze.cells[current.row][current.col];
-    let wallFound = false;
-
-    if (actualCell.walls.north && !memoryWalls[current.row][current.col].north) {
-      memoryWalls[current.row][current.col].north = true;
-      if (current.row > 0) memoryWalls[current.row - 1][current.col].south = true;
-      wallFound = true;
-    }
-    if (actualCell.walls.east && !memoryWalls[current.row][current.col].east) {
-      memoryWalls[current.row][current.col].east = true;
-      if (current.col < cols - 1) memoryWalls[current.row][current.col + 1].west = true;
-      wallFound = true;
-    }
-    if (actualCell.walls.south && !memoryWalls[current.row][current.col].south) {
-      memoryWalls[current.row][current.col].south = true;
-      if (current.row < rows - 1) memoryWalls[current.row + 1][current.col].north = true;
-      wallFound = true;
-    }
-    if (actualCell.walls.west && !memoryWalls[current.row][current.col].west) {
-      memoryWalls[current.row][current.col].west = true;
-      if (current.col > 0) memoryWalls[current.row][current.col - 1].east = true;
-      wallFound = true;
-    }
-
-    if (wallFound) {
-      pruneDeadEnd(current);
-    }
-
-    let plannedRoute = solveDijkstraOnKnown(current, goal);
-    let nextCell: GridPosition | null = null;
-
-    if (plannedRoute.length > 1) {
-      const candidate = plannedRoute[1];
-      const dir = getRelativeDirection(current, candidate);
-      let blocked = false;
-      if (dir === 'NORTH') blocked = actualCell.walls.north;
-      else if (dir === 'EAST') blocked = actualCell.walls.east;
-      else if (dir === 'SOUTH') blocked = actualCell.walls.south;
-      else if (dir === 'WEST') blocked = actualCell.walls.west;
-
-      if (!blocked) {
-        nextCell = candidate;
-      } else {
-        if (dir === 'NORTH') {
-          memoryWalls[current.row][current.col].north = true;
-          if (current.row > 0) memoryWalls[current.row - 1][current.col].south = true;
-        } else if (dir === 'EAST') {
-          memoryWalls[current.row][current.col].east = true;
-          if (current.col < cols - 1) memoryWalls[current.row][current.col + 1].west = true;
-        } else if (dir === 'SOUTH') {
-          memoryWalls[current.row][current.col].south = true;
-          if (current.row < rows - 1) memoryWalls[current.row + 1][current.col].north = true;
-        } else if (dir === 'WEST') {
-          memoryWalls[current.row][current.col].west = true;
-          if (current.col > 0) memoryWalls[current.row][current.col - 1].east = true;
-        }
-        pruneDeadEnd(current);
-      }
-    }
-
-    if (!nextCell) {
-      const valid = getValidNeighbors(maze, current).filter((n) => !deadEnds.has(`${n.row},${n.col}`));
-      if (valid.length === 0) {
-        const anyNeighbors = getValidNeighbors(maze, current);
-        if (anyNeighbors.length === 0) break;
-        anyNeighbors.sort((a, b) => {
-          const vA = visitCounts.get(`${a.row},${a.col}`) || 0;
-          const vB = visitCounts.get(`${b.row},${b.col}`) || 0;
-          return vA - vB;
-        });
-        nextCell = anyNeighbors[0];
-      } else {
-        valid.sort((a, b) => {
-          const vA = visitCounts.get(`${a.row},${a.col}`) || 0;
-          const vB = visitCounts.get(`${b.row},${b.col}`) || 0;
-          return vA - vB;
-        });
-        nextCell = valid[0];
-      }
-    }
-
-    current = { ...nextCell };
-    const visitKey = `${current.row},${current.col}`;
-    visitCounts.set(visitKey, (visitCounts.get(visitKey) || 0) + 1);
-    path.push(current);
   }
 
   return path;
 }
 
 /**
- * 4. REAL ONLINE A* & TURN-OPTIMIZED A* (Khám phá trực tuyến có Quay lui):
- * Chuột chỉ thấy tường ở ô hiện tại. Nếu đi vào nhánh cụt có tường chặn,
- * nó cập nhật bản đồ trí nhớ và lập kế hoạch mới từ vị trí hiện tại -> lùi lại ra khỏi nhánh cụt!
+ * 6. REAL ONLINE A* & TURN-OPTIMIZED A* (Khám phá mù quán tính & Quay lui vật lý):
+ * Chuột hoàn toàn KHÔNG biết trước tọa độ ô Đích (Zero-Knowledge Blind Exploration).
+ * - Chuột ưu tiên duy trì quán tính thẳng (ít bẻ góc 90° để tối ưu động lượng).
+ * - Tại các ngã ba, chọn ngã rẽ chưa từng đặt chân đến (unvisited).
+ * - Khi đụng ngõ cụt (dead-end), chuột tự động quay lui vật lý (backtrack) từng bước về ngã ba gần nhất!
+ * - Chuột chỉ dừng lại khi bước chân chạm tới đúng ô Đích!
  */
 export function simulateRealOnlineAStar(
   maze: MazeGrid,
@@ -556,173 +363,183 @@ export function simulateRealOnlineAStar(
 ): GridPosition[] {
   const rows = maze.rows;
   const cols = maze.cols;
-  const memoryWalls = createEmptyMemoryWalls(rows, cols);
-  const deadEnds = new Set<string>();
-  const visitCounts = new Map<string, number>();
-
-  const getKnownMaze = (): MazeGrid => ({
-    rows,
-    cols,
-    start,
-    goal,
-    cells: Array.from({ length: rows }, (_, r) =>
-      Array.from({ length: cols }, (_, c) => ({
-        row: r,
-        col: c,
-        walls: { ...memoryWalls[r][c] },
-      }))
-    ),
-  });
-
-  // Tự động lấp các nhánh cụt đã khám phá để chuột không bao giờ đi lại vào ngõ cụt
-  const pruneDeadEnd = (pos: GridPosition) => {
-    let p: GridPosition | null = pos;
-    while (p && (p.row !== goal.row || p.col !== goal.col) && (p.row !== start.row || p.col !== start.col)) {
-      const w = memoryWalls[p.row][p.col];
-      let openExits: Array<{ next: GridPosition; dir: Direction }> = [];
-      if (!w.north && p.row > 0) openExits.push({ next: { row: p.row - 1, col: p.col }, dir: 'NORTH' });
-      if (!w.east && p.col < cols - 1) openExits.push({ next: { row: p.row, col: p.col + 1 }, dir: 'EAST' });
-      if (!w.south && p.row < rows - 1) openExits.push({ next: { row: p.row + 1, col: p.col }, dir: 'SOUTH' });
-      if (!w.west && p.col > 0) openExits.push({ next: { row: p.row, col: p.col - 1 }, dir: 'WEST' });
-
-      // Lọc bỏ những ô kế cận đã bị xác nhận là dead-end
-      openExits = openExits.filter((e) => !deadEnds.has(`${e.next.row},${e.next.col}`));
-
-      if (openExits.length <= 1) {
-        deadEnds.add(`${p.row},${p.col}`);
-        // Lấp kín ô này trên memoryWalls
-        memoryWalls[p.row][p.col] = { north: true, east: true, south: true, west: true };
-        if (openExits.length === 1) {
-          const exit = openExits[0];
-          // Bịt tường từ phía ô hàng xóm sang ô ngõ cụt này
-          if (exit.dir === 'NORTH') memoryWalls[exit.next.row][exit.next.col].south = true;
-          else if (exit.dir === 'EAST') memoryWalls[exit.next.row][exit.next.col].west = true;
-          else if (exit.dir === 'SOUTH') memoryWalls[exit.next.row][exit.next.col].north = true;
-          else if (exit.dir === 'WEST') memoryWalls[exit.next.row][exit.next.col].east = true;
-          p = exit.next;
-        } else {
-          p = null;
-        }
-      } else {
-        break;
-      }
-    }
-  };
-
+  const visited = new Set<string>([`${start.row},${start.col}`]);
+  const branchStack: GridPosition[] = [start];
   const path: GridPosition[] = [start];
   let current: GridPosition = { ...start };
   let heading: Direction = 'EAST';
-  visitCounts.set(`${start.row},${start.col}`, 1);
-  const maxSteps = rows * cols * 6;
+  const maxSteps = rows * cols * 8;
 
   for (let step = 0; step < maxSteps; step++) {
     if (current.row === goal.row && current.col === goal.col) break;
 
-    // 1. Cảm biến nhận diện các bức tường thực tế của ô hiện tại
-    const actualCell = maze.cells[current.row][current.col];
-    let wallFound = false;
+    const neighbors = getValidNeighbors(maze, current);
+    const unvisited = neighbors.filter((n) => !visited.has(`${n.row},${n.col}`));
 
-    if (actualCell.walls.north && !memoryWalls[current.row][current.col].north) {
-      memoryWalls[current.row][current.col].north = true;
-      if (current.row > 0) memoryWalls[current.row - 1][current.col].south = true;
-      wallFound = true;
-    }
-    if (actualCell.walls.east && !memoryWalls[current.row][current.col].east) {
-      memoryWalls[current.row][current.col].east = true;
-      if (current.col < cols - 1) memoryWalls[current.row][current.col + 1].west = true;
-      wallFound = true;
-    }
-    if (actualCell.walls.south && !memoryWalls[current.row][current.col].south) {
-      memoryWalls[current.row][current.col].south = true;
-      if (current.row < rows - 1) memoryWalls[current.row + 1][current.col].north = true;
-      wallFound = true;
-    }
-    if (actualCell.walls.west && !memoryWalls[current.row][current.col].west) {
-      memoryWalls[current.row][current.col].west = true;
-      if (current.col > 0) memoryWalls[current.row][current.col - 1].east = true;
-      wallFound = true;
-    }
+    if (unvisited.length > 0) {
+      if (withTurnPenalty) {
+        // A* Mượt: Ưu tiên duy trì đà đi thẳng (heading)
+        unvisited.sort((a, b) => {
+          const straightA = getRelativeDirection(current, a) === heading ? -1 : 0;
+          const straightB = getRelativeDirection(current, b) === heading ? -1 : 0;
+          return straightA - straightB;
+        });
+      }
 
-    if (wallFound) {
-      pruneDeadEnd(current);
-    }
+      const next = unvisited[0];
+      visited.add(`${next.row},${next.col}`);
+      branchStack.push(next);
 
-    // 2. Lập kế hoạch lộ trình trên mê cung trí nhớ
-    const knownMaze = getKnownMaze();
-    let plannedRoute: GridPosition[] = [];
-    if (withTurnPenalty) {
-      plannedRoute = solveTurnPenaltyAStar(knownMaze, current, goal, 1.4, heading);
+      const nextDir = getRelativeDirection(current, next);
+      if (nextDir) heading = nextDir;
+
+      current = { ...next };
+      path.push(current);
     } else {
-      plannedRoute = solveAStar(knownMaze, current, goal);
+      // ĐỤNG NGÕ CỤT! Quay lui vật lý từng bước (Backtrack) về ngã ba gần nhất
+      branchStack.pop();
+      if (branchStack.length === 0) break;
+
+      const backtrackNode = branchStack[branchStack.length - 1];
+      const backDir = getRelativeDirection(current, backtrackNode);
+      if (backDir) heading = backDir;
+
+      current = { ...backtrackNode };
+      path.push(current);
     }
-
-    // 3. Tiến 1 bước theo kế hoạch hoặc thăm dò các lối đi hợp lệ
-    let nextCell: GridPosition | null = null;
-    if (plannedRoute.length > 1) {
-      const candidate = plannedRoute[1];
-      const dir = getRelativeDirection(current, candidate);
-      let blocked = false;
-      if (dir === 'NORTH') blocked = actualCell.walls.north;
-      else if (dir === 'EAST') blocked = actualCell.walls.east;
-      else if (dir === 'SOUTH') blocked = actualCell.walls.south;
-      else if (dir === 'WEST') blocked = actualCell.walls.west;
-
-      if (!blocked) {
-        nextCell = candidate;
-      } else {
-        // Đụng tường chắn! Cập nhật ngay vào trí nhớ và lấp ngõ cụt
-        if (dir === 'NORTH') {
-          memoryWalls[current.row][current.col].north = true;
-          if (current.row > 0) memoryWalls[current.row - 1][current.col].south = true;
-        } else if (dir === 'EAST') {
-          memoryWalls[current.row][current.col].east = true;
-          if (current.col < cols - 1) memoryWalls[current.row][current.col + 1].west = true;
-        } else if (dir === 'SOUTH') {
-          memoryWalls[current.row][current.col].south = true;
-          if (current.row < rows - 1) memoryWalls[current.row + 1][current.col].north = true;
-        } else if (dir === 'WEST') {
-          memoryWalls[current.row][current.col].west = true;
-          if (current.col > 0) memoryWalls[current.row][current.col - 1].east = true;
-        }
-        pruneDeadEnd(current);
-      }
-    }
-
-    // Nếu bước theo kế hoạch bị chặn hoặc không tìm ra đường, chọn ô khả dụng tốt nhất
-    if (!nextCell) {
-      const valid = getValidNeighbors(maze, current).filter((n) => !deadEnds.has(`${n.row},${n.col}`));
-      if (valid.length === 0) {
-        // Rút lui theo ô có số lần thăm ít nhất
-        const anyNeighbors = getValidNeighbors(maze, current);
-        if (anyNeighbors.length === 0) break;
-        anyNeighbors.sort((a, b) => {
-          const vA = visitCounts.get(`${a.row},${a.col}`) || 0;
-          const vB = visitCounts.get(`${b.row},${b.col}`) || 0;
-          return vA - vB;
-        });
-        nextCell = anyNeighbors[0];
-      } else {
-        // Ưu tiên ô chưa ghé thăm hoặc có heuristic tốt nhất
-        valid.sort((a, b) => {
-          const vA = visitCounts.get(`${a.row},${a.col}`) || 0;
-          const vB = visitCounts.get(`${b.row},${b.col}`) || 0;
-          if (vA !== vB) return vA - vB;
-          return manhattanDistance(a, goal) - manhattanDistance(b, goal);
-        });
-        nextCell = valid[0];
-      }
-    }
-
-    const moveDir = getRelativeDirection(current, nextCell);
-    if (moveDir) heading = moveDir;
-
-    current = { ...nextCell };
-    const visitKey = `${current.row},${current.col}`;
-    visitCounts.set(visitKey, (visitCounts.get(visitKey) || 0) + 1);
-    path.push(current);
   }
 
   return path;
+}
+
+/**
+ * 7. THỰC THI THUẬT TOÁN TỰ VIẾT CỦA DEVELOPER (Sandboxed User Custom Code Runner):
+ * Chạy code thực tế viết trong RobotEditor với cảm biến khám phá mù.
+ */
+export function simulateUserCustomCode(
+  maze: MazeGrid,
+  start: GridPosition,
+  goal: GridPosition,
+  code: string
+): GridPosition[] {
+  try {
+    let cleanCode = code.replace(/import\s+[\s\S]*?from\s+['"][^'"]+['"];?/g, '');
+    cleanCode = cleanCode.replace(/export\s+default\s+defineMazeSolver\s*\(/g, 'return defineMazeSolver(');
+    cleanCode = cleanCode.replace(/export\s+default\s+/g, 'return ');
+
+    const defineMazeSolver = (metadata: any, solver: any) => ({ metadata, solver });
+    const manhattanDistance = (p1: GridPosition, p2: GridPosition) =>
+      Math.abs(p1.row - p2.row) + Math.abs(p1.col - p2.col);
+
+    const fn = new Function('defineMazeSolver', 'manhattanDistance', cleanCode);
+    const compiled = fn(defineMazeSolver, manhattanDistance);
+    const solver = compiled?.solver || compiled;
+
+    if (!solver || typeof solver.onStep !== 'function') {
+      return simulateRealOnlineAStar(maze, start, goal, true);
+    }
+
+    if (typeof solver.init === 'function') {
+      solver.init({
+        start: { ...start },
+        mazeDimensions: { rows: maze.rows, cols: maze.cols },
+      });
+    }
+
+    const path: GridPosition[] = [start];
+    let current: GridPosition = { ...start };
+    let heading: Direction = 'EAST';
+    const maxSteps = maze.rows * maze.cols * 8;
+
+    for (let step = 0; step < maxSteps; step++) {
+      if (current.row === goal.row && current.col === goal.col) break;
+
+      const cell = maze.cells[current.row][current.col];
+      const validNeighbors = getValidNeighbors(maze, current);
+      const availableDirections: Direction[] = [];
+      if (!cell.walls.north && current.row > 0) availableDirections.push('NORTH');
+      if (!cell.walls.east && current.col < maze.cols - 1) availableDirections.push('EAST');
+      if (!cell.walls.south && current.row < maze.rows - 1) availableDirections.push('SOUTH');
+      if (!cell.walls.west && current.col > 0) availableDirections.push('WEST');
+
+      const sensor = {
+        position: { ...current },
+        direction: heading,
+        currentCell: cell,
+        adjacentWalls: {
+          north: cell.walls.north,
+          east: cell.walls.east,
+          south: cell.walls.south,
+          west: cell.walls.west,
+          front: heading === 'NORTH' ? cell.walls.north : heading === 'EAST' ? cell.walls.east : heading === 'SOUTH' ? cell.walls.south : cell.walls.west,
+          back: heading === 'NORTH' ? cell.walls.south : heading === 'EAST' ? cell.walls.west : heading === 'SOUTH' ? cell.walls.north : cell.walls.east,
+          left: heading === 'NORTH' ? cell.walls.west : heading === 'EAST' ? cell.walls.north : heading === 'SOUTH' ? cell.walls.east : cell.walls.south,
+          right: heading === 'NORTH' ? cell.walls.east : heading === 'EAST' ? cell.walls.south : heading === 'SOUTH' ? cell.walls.west : cell.walls.north,
+        },
+        availableNeighbors: validNeighbors,
+        availableDirections,
+        mazeDimensions: { rows: maze.rows, cols: maze.cols },
+        goal: { row: -1, col: -1 }, // Ẩn hoàn toàn vị trí đích
+        manhattanDistanceToGoal: -1,
+        euclideanDistanceToGoal: -1,
+        isGoalFound: current.row === goal.row && current.col === goal.col,
+      };
+
+      let decision = solver.onStep(sensor);
+      let nextPos: GridPosition | null = null;
+
+      if (decision && typeof decision === 'object') {
+        if ('row' in decision && 'col' in decision) {
+          nextPos = decision as GridPosition;
+        } else if ('type' in decision) {
+          const action = decision as any;
+          if (action.type === 'move_forward') {
+            const delta = DIRECTION_OFFSETS[heading];
+            nextPos = { row: current.row + delta.row, col: current.col + delta.col };
+          } else if (action.type === 'turn_left') {
+            const leftMap: Record<Direction, Direction> = { NORTH: 'WEST', WEST: 'SOUTH', SOUTH: 'EAST', EAST: 'NORTH' };
+            heading = leftMap[heading];
+            const delta = DIRECTION_OFFSETS[heading];
+            nextPos = { row: current.row + delta.row, col: current.col + delta.col };
+          } else if (action.type === 'turn_right') {
+            const rightMap: Record<Direction, Direction> = { NORTH: 'EAST', EAST: 'SOUTH', SOUTH: 'WEST', WEST: 'NORTH' };
+            heading = rightMap[heading];
+            const delta = DIRECTION_OFFSETS[heading];
+            nextPos = { row: current.row + delta.row, col: current.col + delta.col };
+          } else if (action.type === 'step_to' && action.target) {
+            nextPos = action.target;
+          }
+        }
+      } else if (typeof decision === 'string' && ['NORTH', 'EAST', 'SOUTH', 'WEST'].includes(decision)) {
+        heading = decision as Direction;
+        const delta = DIRECTION_OFFSETS[heading];
+        nextPos = { row: current.row + delta.row, col: current.col + delta.col };
+      }
+
+      if (nextPos) {
+        const isValid = validNeighbors.some((n) => n.row === nextPos!.row && n.col === nextPos!.col);
+        if (isValid) {
+          const nextDir = getRelativeDirection(current, nextPos);
+          if (nextDir) heading = nextDir;
+          current = { ...nextPos };
+          path.push(current);
+          continue;
+        }
+      }
+
+      if (validNeighbors.length > 0) {
+        current = { ...validNeighbors[0] };
+        path.push(current);
+      } else {
+        break;
+      }
+    }
+
+    return path;
+  } catch (err) {
+    console.warn('Lỗi thực thi mã người dùng, fallback sang Blind Momentum Explorer:', err);
+    return simulateRealOnlineAStar(maze, start, goal, true);
+  }
 }
 
 export interface MazeSimulationConfig {
@@ -826,10 +643,12 @@ export class MazeSimulationEngine {
         path = dijkstraPath;
       } else if (algo.id === 'greedy_bfs') {
         path = greedyPath;
+      } else if (algo.code && algo.isCustom) {
+        // Chạy thuật toán tự viết của lập trình viên trong môi trường khám phá mù
+        path = simulateUserCustomCode(this.maze, start, goal, algo.code);
       } else {
-        // Custom dev algorithm: Bắt buộc khám phá mù công bằng theo luật (Online Blind Exploration / Fog of War)
+        // Fallback mặc định: Khám phá mù giữ đà quán tính
         path = simulateRealOnlineAStar(this.maze, start, goal, true);
-        if (path.length === 0) path = simulateRealOnlineAStar(this.maze, start, goal, false);
       }
 
       // Giữ nguyên 100% lộ trình tự khám phá trung thực của robot, không tự ý chèn đường tắt ăn gian

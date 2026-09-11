@@ -2,43 +2,42 @@ import { create } from 'zustand';
 
 export const MAZE_ALGORITHM_TEMPLATES: Record<string, { name: string; code: string }> = {
   turn_astar: {
-    name: 'Turn-Optimized Smooth A* (Tối ưu góc rẽ)',
-    code: `import { defineMazeSolver, manhattanDistance } from '@robot-arena/robot-sdk';
+    name: 'Turn-Optimized Inertial Explorer (A* Quán tính khám phá mù)',
+    code: `import { defineMazeSolver } from '@robot-arena/robot-sdk';
 
 /**
  * ==============================================================================
- * THUẬT TOÁN: TURN-OPTIMIZED A* (A* PHẠT GÓC CUA 90°)
+ * THUẬT TOÁN: A* QUÁN TÍNH KHÁM PHÁ MÙ (ZERO-KNOWLEDGE MOMENTUM EXPLORER)
  * ==============================================================================
- * ⚠️ LUẬT THI ĐẤU (ANTI-CHEAT / FOG OF WAR):
- * Robot KHÔNG có bản đồ toàn cảnh (fullMazeMap bị cấm). Bạn chỉ nhận được cảm biến
- * tại ô hiện tại (sensor.adjacentWalls, sensor.availableNeighbors).
- * Robot phải tự lập bản đồ trong trí nhớ và phán đoán nước đi!
+ * ⚠️ LUẬT THI ĐẤU (KHÁM PHÁ MÙ):
+ * Robot HOÀN TOÀN KHÔNG BIẾT VỊ TRÍ ĐÍCH trước!
+ * Bạn chỉ nhận được cảm biến tại ô hiện tại (sensor.position, sensor.direction,
+ * sensor.adjacentWalls, sensor.availableNeighbors).
+ * Robot phải tự mình thám hiểm mê cung, gặp ngõ cụt thì tự quay đầu rút lui!
  *
  * 🎯 CHIẾN THUẬT:
- * - Khi bẻ cua 90°, robot bị giảm tốc độ và mất động lượng.
- * - Thuật toán cộng thêm điểm phạt (turn penalty) nếu phải rẽ, ưu tiên duy trì
- *   hướng đi thẳng nếu lối đi phía trước vẫn thông thoáng.
+ * - Ưu tiên giữ quán tính đi THẲNG để duy trì vận tốc tối đa trên các hành lang dài.
+ * - Tại các ngã ba, chọn các nhánh chưa từng đặt chân đến (unvisited).
+ * - Lưu ngã ba vào ngăn xếp (branchStack) để quay lui vật lý (backtrack) khi gặp ngõ cụt.
  * ==============================================================================
  */
 export default defineMazeSolver({
-  name: 'Tối Ưu Góc Rẽ',
+  name: 'Khám Phá Quán Tính',
   author: 'NguyenHuuHung',
   color: '#000000',
-  description: 'Phạt góc cua 90°, ưu tiên đường thẳng dài để đạt vận tốc tối đa',
+  description: 'Không biết trước đích, giữ đà đi thẳng và tự quay lui khi gặp ngõ cụt',
 }, {
-  // Trí nhớ nội tại của robot
   visited: null,
   branchStack: [],
 
   init(config) {
-    // Khởi tạo bộ nhớ khi bước vào mê cung mới
-    console.log(\`Mê cung kích thước: \${config.mazeDimensions.rows}x\${config.mazeDimensions.cols}\`);
+    console.log(\`Bước vào mê cung kích thước: \${config.mazeDimensions.rows}x\${config.mazeDimensions.cols}\`);
     this.visited = new Set();
     this.branchStack = [];
   },
 
   onStep(sensor) {
-    const { position, goal, direction, availableNeighbors } = sensor;
+    const { position, direction, availableNeighbors } = sensor;
     const currentKey = \`\${position.row},\${position.col}\`;
     this.visited.add(currentKey);
 
@@ -53,7 +52,7 @@ export default defineMazeSolver({
         this.branchStack.push({ ...position });
       }
 
-      // Xác định tọa độ nếu tiếp tục đi THẲNG theo hướng nhìn hiện tại
+      // 2. KHÁM PHÁ QUÁN TÍNH: Ưu tiên tiếp tục đi THẲNG theo hướng nhìn hiện tại
       let straightRow = position.row;
       let straightCol = position.col;
       if (direction === 'NORTH') straightRow -= 1;
@@ -61,24 +60,15 @@ export default defineMazeSolver({
       else if (direction === 'EAST') straightCol += 1;
       else if (direction === 'WEST') straightCol -= 1;
 
-      // 2. Tính điểm chi phí cho từng ô lân cận: Cost = Manhattan + Phạt Rẽ Cua
-      let bestNeighbor = unvisited[0];
-      let lowestCost = Infinity;
-
-      for (const n of unvisited) {
-        const h = manhattanDistance(n, goal); // Khoảng cách hình học tới đích
-        const isStraight = (n.row === straightRow && n.col === straightCol);
-        // Nếu phải rẽ hướng khác thì phạt thêm 0.8 đơn vị chi phí
-        const turnPenalty = isStraight ? 0 : 0.8;
-        const totalCost = h + turnPenalty;
-
-        if (totalCost < lowestCost) {
-          lowestCost = totalCost;
-          bestNeighbor = n;
-        }
+      const straightMove = unvisited.find(
+        (n) => n.row === straightRow && n.col === straightCol
+      );
+      if (straightMove) {
+        return straightMove; // Giữ đà thẳng mượt mà
       }
 
-      return bestNeighbor;
+      // Nếu không đi thẳng được -> Rẽ vào nhánh chưa khám phá đầu tiên
+      return unvisited[0];
     }
 
     // 3. ĐỤNG NGÕ CỤT: Quay lui vật lý (Backtrack) về ngã ba gần nhất
@@ -88,6 +78,7 @@ export default defineMazeSolver({
       if (!hasBranchLeft) {
         this.branchStack.pop();
       }
+      return backtrackTarget;
     }
 
     // Mặc định chọn ô có sẵn để rút lui
@@ -97,100 +88,98 @@ export default defineMazeSolver({
 `,
   },
   astar: {
-    name: 'Standard Online A* (Manhattan Heuristic)',
-    code: `import { defineMazeSolver, manhattanDistance } from '@robot-arena/robot-sdk';
+    name: 'Frontier Exploration (Khám phá biên mù)',
+    code: `import { defineMazeSolver } from '@robot-arena/robot-sdk';
 
 /**
  * ==============================================================================
- * THUẬT TOÁN: A* TIÊU CHUẨN (ONLINE EXPLORATION A*)
+ * THUẬT TOÁN: KHÁM PHÁ BIÊN MÙ (FRONTIER EXPLORATION)
  * ==============================================================================
- * ⚠️ NGUYÊN TẮC THI ĐẤU:
- * Robot hoàn toàn không biết cấu trúc mê cung trước mắt (Zero-Knowledge).
- * Tại mỗi bước, robot đánh giá hàm f(n) = g(n) + h(n):
- * - g(n): Chi phí số bước đã đi từ vạch xuất phát.
- * - h(n): Khoảng cách Manhattan ước lượng tới Đích |r1 - r2| + |c1 - c2|.
+ * 💡 NGUYÊN LÝ:
+ * Chuột hoàn toàn không biết đích ở đâu. Chuột lập bản đồ các ô đã đi qua
+ * và liên tục mở rộng ranh giới (Frontier) bằng cách ghé thăm các ô mới lạ.
+ * Khi rơi vào ngõ cụt, chuột lùi từng bước về lối rẽ chưa khám phá gần nhất.
  * ==============================================================================
  */
 export default defineMazeSolver({
-  name: 'A-Star Chuẩn',
+  name: 'Frontier Explorer',
   author: 'NguyenHuuHung',
   color: '#2563eb',
 }, {
   visited: null,
-  stepCounter: 0,
+  trail: [],
 
   init(config) {
     this.visited = new Set();
-    this.stepCounter = 0;
+    this.trail = [];
   },
 
   onStep(sensor) {
-    this.stepCounter++;
-    const { position, goal, availableNeighbors } = sensor;
-    this.visited.add(\`\${position.row},\${position.col}\`);
+    const { position, availableNeighbors } = sensor;
+    const key = \`\${position.row},\${position.col}\`;
+    this.visited.add(key);
 
     // Lọc các ô chưa khám phá
     const freshMoves = availableNeighbors.filter(
       (n) => !this.visited.has(\`\${n.row},\${n.col}\`)
     );
 
-    // Nếu còn đường mới -> Chọn ô có khoảng cách Manhattan tới đích ngắn nhất
     if (freshMoves.length > 0) {
-      freshMoves.sort((a, b) => manhattanDistance(a, goal) - manhattanDistance(b, goal));
+      this.trail.push({ ...position });
       return freshMoves[0];
     }
 
-    // Nếu vào đường cùng -> Rút lui theo ô lối thoát khả dụng
+    // Nếu vào đường cùng -> Quay lui theo vết chân cũ
+    if (this.trail.length > 0) {
+      return this.trail.pop();
+    }
+
     return availableNeighbors[0] || position;
   }
 });
 `,
   },
   floodfill: {
-    name: 'Micromouse Flood Fill (Ma trận thế năng)',
+    name: 'Frontier Flood Fill (Thế năng hút ô chưa khám phá)',
     code: `import { defineMazeSolver } from '@robot-arena/robot-sdk';
 
 /**
  * ==============================================================================
- * THUẬT TOÁN: MICROMOUSE FLOOD FILL (CHUẨN GIẢI ĐẤU IEEE)
+ * THUẬT TOÁN: FRONTIER FLOOD FILL (THẾ NĂNG DẬY SÓNG)
  * ==============================================================================
- * 💡 NGUYÊN LÝ HOẠT ĐỘNG:
- * 1. Robot duy trì ma trận thế năng khoảng cách 'potentialGrid' dội từ ô Đích về.
- * 2. Ban đầu giả định mê cung trống, khoảng cách là Manhattan.
- * 3. Khi đi qua mỗi ô, robot nhận diện tường và cập nhật các ô đã đi qua.
- * 4. Robot luôn luôn trôi về ô lân cận có thế năng thấp nhất. Khi đụng tường cụt,
- *    thế năng ô đó tự tăng vọt, đẩy robot quay đầu 180° thoát ra ngoài!
+ * 💡 NGUYÊN LÝ:
+ * Chuột không biết trước tọa độ đích.
+ * Thay vào đó, chuột đo thế năng dựa trên số lần đặt chân:
+ * - Ô chưa từng đi qua có thế năng thấp nhất (bị hút mạnh mẽ).
+ * - Ô đã đi nhiều lần có thế năng dâng cao (tự động đẩy chuột ra xa khỏi ngõ cụt).
  * ==============================================================================
  */
 export default defineMazeSolver({
-  name: 'Micromouse Thế Năng',
+  name: 'Thế Năng Hút Biên',
   author: 'NguyenHuuHung',
   color: '#7c3aed',
 }, {
-  visited: null,
+  visitCounts: null,
 
   init(config) {
-    this.visited = new Set();
+    this.visitCounts = new Map();
   },
 
   onStep(sensor) {
-    const { position, goal, availableNeighbors } = sensor;
+    const { position, availableNeighbors } = sensor;
     const currentKey = \`\${position.row},\${position.col}\`;
-    this.visited.add(currentKey);
+    this.visitCounts.set(currentKey, (this.visitCounts.get(currentKey) || 0) + 1);
 
-    // Tính thế năng tới đích cho các ô xung quanh
+    // Tìm ô lân cận có thế năng (số lần ghé thăm) thấp nhất
     let bestMove = availableNeighbors[0] || position;
     let minPotential = Infinity;
 
     for (const neighbor of availableNeighbors) {
-      // Thế năng cơ bản = Khoảng cách Manhattan tới đích
-      const dist = Math.abs(neighbor.row - goal.row) + Math.abs(neighbor.col - goal.col);
-      // Cộng thêm điểm phạt nếu ô này đã từng đi qua (đẩy lùi ngõ cụt)
-      const penalty = this.visited.has(\`\${neighbor.row},\${neighbor.col}\`) ? 50 : 0;
-      const totalPotential = dist + penalty;
+      const nKey = \`\${neighbor.row},\${neighbor.col}\`;
+      const potential = this.visitCounts.get(nKey) || 0;
 
-      if (totalPotential < minPotential) {
-        minPotential = totalPotential;
+      if (potential < minPotential) {
+        minPotential = potential;
         bestMove = neighbor;
       }
     }
