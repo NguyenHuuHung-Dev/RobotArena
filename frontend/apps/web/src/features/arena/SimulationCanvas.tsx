@@ -122,14 +122,15 @@ export const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
             ctx.fillRect(x + cellSize / 2 - 1, y + cellSize / 2 - 1, 2, 2);
           }
         } else {
-          // Góc nhìn toàn cảnh (Khán giả): Vùng chuột chưa khám phá được hiển thị xám mờ
+          // Góc nhìn toàn cảnh (Khán giả): Vùng chuột chưa khám phá hiển thị sơ đồ blueprint
           if (hasBeenExplored) {
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(x, y, cellSize, cellSize);
           } else {
             ctx.fillStyle = '#f8fafc';
             ctx.fillRect(x, y, cellSize, cellSize);
-            ctx.fillStyle = '#cbd5e1';
+            // Dấu chấm lưới tọa độ sơ phác (chưa được radar quét qua)
+            ctx.fillStyle = '#94a3b8';
             ctx.fillRect(x + cellSize / 2 - 1, y + cellSize / 2 - 1, 2, 2);
           }
         }
@@ -198,7 +199,48 @@ export const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
       }
     }
 
-    // 4. Maze Walls (Solid crisp black, square architectural lines)
+    // 4. Maze Walls: Architectural Real-time Exploration Mapping
+    // Pass A: Unscanned Blueprint walls (Faint light blueprint lines in Spectator Mode, Hidden in Fog of War)
+    if (!fogOfWar) {
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      ctx.lineCap = 'square';
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (!revealedCells.has(`${r},${c}`)) {
+            const cell = maze.cells[r][c];
+            const x = startX + c * cellSize;
+            const y = startY + r * cellSize;
+            if (cell.walls.north) {
+              ctx.beginPath();
+              ctx.moveTo(x, y);
+              ctx.lineTo(x + cellSize, y);
+              ctx.stroke();
+            }
+            if (cell.walls.east) {
+              ctx.beginPath();
+              ctx.moveTo(x + cellSize, y);
+              ctx.lineTo(x + cellSize, y + cellSize);
+              ctx.stroke();
+            }
+            if (cell.walls.south) {
+              ctx.beginPath();
+              ctx.moveTo(x, y + cellSize);
+              ctx.lineTo(x + cellSize, y + cellSize);
+              ctx.stroke();
+            }
+            if (cell.walls.west) {
+              ctx.beginPath();
+              ctx.moveTo(x, y);
+              ctx.lineTo(x, y + cellSize);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+    }
+
+    // Pass B: Actively Scanned & Discovered Walls (Crisp Architectural Solid Black #000000)
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = Math.max(1.8, Math.floor(cellSize * 0.1));
     ctx.lineCap = 'square';
@@ -208,31 +250,33 @@ export const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
         const cell = maze.cells[r][c];
         const x = startX + c * cellSize;
         const y = startY + r * cellSize;
-        const thisRevealed = !fogOfWar || revealedCells.has(`${r},${c}`);
+        const thisRevealed = revealedCells.has(`${r},${c}`);
 
-        if (cell.walls.north && (thisRevealed || (r > 0 && revealedCells.has(`${r - 1},${c}`)))) {
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x + cellSize, y);
-          ctx.stroke();
-        }
-        if (cell.walls.east && (thisRevealed || (c < cols - 1 && revealedCells.has(`${r},${c + 1}`)))) {
-          ctx.beginPath();
-          ctx.moveTo(x + cellSize, y);
-          ctx.lineTo(x + cellSize, y + cellSize);
-          ctx.stroke();
-        }
-        if (cell.walls.south && (thisRevealed || (r < rows - 1 && revealedCells.has(`${r + 1},${c}`)))) {
-          ctx.beginPath();
-          ctx.moveTo(x, y + cellSize);
-          ctx.lineTo(x + cellSize, y + cellSize);
-          ctx.stroke();
-        }
-        if (cell.walls.west && (thisRevealed || (c > 0 && revealedCells.has(`${r},${c - 1}`)))) {
-          ctx.beginPath();
-          ctx.moveTo(x, y);
-          ctx.lineTo(x, y + cellSize);
-          ctx.stroke();
+        if (thisRevealed) {
+          if (cell.walls.north) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + cellSize, y);
+            ctx.stroke();
+          }
+          if (cell.walls.east) {
+            ctx.beginPath();
+            ctx.moveTo(x + cellSize, y);
+            ctx.lineTo(x + cellSize, y + cellSize);
+            ctx.stroke();
+          }
+          if (cell.walls.south) {
+            ctx.beginPath();
+            ctx.moveTo(x, y + cellSize);
+            ctx.lineTo(x + cellSize, y + cellSize);
+            ctx.stroke();
+          }
+          if (cell.walls.west) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x, y + cellSize);
+            ctx.stroke();
+          }
         }
       }
     }

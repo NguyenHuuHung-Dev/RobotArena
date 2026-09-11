@@ -195,7 +195,7 @@ export const useSimulationStore = create<MazeRaceStoreState>((set) => ({
   fogOfWar: false,
 
   algorithmsList: [...initialCustomAlgos, ...DEFAULT_ALGORITHMS],
-  activeAlgorithms: ['turn_astar', 'standard_astar', 'floodfill'],
+  activeAlgorithms: ['turn_astar', 'floodfill', 'dfs'],
 
   setTickData: (tick) =>
     set({

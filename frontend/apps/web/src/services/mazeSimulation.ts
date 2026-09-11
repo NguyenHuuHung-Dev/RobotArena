@@ -178,12 +178,6 @@ export function simulateRealMicromouseFloodFill(
     path.push(current);
   }
 
-  // Đảm bảo về đích
-  if (current.row !== goal.row || current.col !== goal.col) {
-    const bridge = solveAStar(maze, current, goal);
-    if (bridge.length > 1) path.push(...bridge.slice(1));
-  }
-
   return path;
 }
 
@@ -255,12 +249,6 @@ export function simulateRealDFSBacktracking(
     }
   }
 
-  // Đảm bảo về đích
-  if (current.row !== goal.row || current.col !== goal.col) {
-    const bridge = solveAStar(maze, current, goal);
-    if (bridge.length > 1) path.push(...bridge.slice(1));
-  }
-
   return path;
 }
 
@@ -310,12 +298,6 @@ export function simulateRealWallFollower(
     }
 
     if (!stepped) break;
-  }
-
-  // Đảm bảo về đích
-  if (current.row !== goal.row || current.col !== goal.col) {
-    const bridge = solveAStar(maze, current, goal);
-    if (bridge.length > 1) path.push(...bridge.slice(1));
   }
 
   return path;
@@ -377,11 +359,6 @@ export function simulateRealGreedyBFS(
       current = { ...backtrackNode };
       path.push(current);
     }
-  }
-
-  if (current.row !== goal.row || current.col !== goal.col) {
-    const bridge = solveAStar(maze, current, goal);
-    if (bridge.length > 1) path.push(...bridge.slice(1));
   }
 
   return path;
