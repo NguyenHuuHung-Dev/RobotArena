@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="./frontend/apps/web/public/logo.png" alt="RobotArena Logo" width="120" />
+
 # 🤖 RobotArena
 ### Real-Time Algorithmic Maze Arena & Multi-Agent Tournament Platform
 
@@ -53,13 +55,15 @@
 
 ## 🚀 Cài Đặt & Khởi Chạy Nhanh
 
-Khởi động hệ thống chỉ với **2 cửa sổ Terminal**:
+Khởi động hệ thống chỉ với **2 cửa sổ Terminal** ngay tại thư mục gốc:
 
 ### 🔹 Terminal 1: Chạy Backend API (.NET 10 & SignalR Hub)
 ```bash
-# Di chuyển vào thư mục backend và chạy
-cd backend/RobotArena.API
-dotnet run
+# Chạy với chế độ Hot-Reload (tự biên dịch lại khi sửa code C#)
+dotnet watch --project backend/RobotArena.API/RobotArena.API.csproj
+
+# Hoặc dùng lệnh tắt npm/pnpm từ thư mục gốc:
+pnpm api:watch
 ```
 * 🌐 **API Server:** `http://localhost:5200`
 * 📑 **Swagger UI:** `http://localhost:5200/swagger`
@@ -68,8 +72,7 @@ dotnet run
 
 ### 🔹 Terminal 2: Chạy Frontend (React + Vite App)
 ```bash
-# Di chuyển vào thư mục frontend và cài đặt dependencies
-cd frontend
+# Cài đặt dependencies (nếu chạy lần đầu)
 pnpm install
 
 # Khởi chạy giao diện Web
@@ -133,6 +136,7 @@ RobotArena/
 │   ├── package.json               # Root Workspace Scripts
 │   └── pnpm-workspace.yaml        # Workspace Package Mapping
 │
+├── RobotArena.slnx                # .NET 10 Solution File
 └── README.md
 ```
 
