@@ -13,8 +13,7 @@ export const ArenaView: React.FC = () => {
     playbackSpeed,
     tickData,
     selectedRobotId,
-    mazeCols,
-    mazeRows,
+    mazeSize,
     goalPosition,
     braidFactor,
     smoothCorners,
@@ -41,8 +40,8 @@ export const ArenaView: React.FC = () => {
   // Initialize or re-create simulation engine
   const initEngine = () => {
     engineRef.current = new MazeSimulationEngine({
-      rows: mazeRows || 17,
-      cols: mazeCols || 29,
+      rows: mazeSize,
+      cols: mazeSize,
       goalPosition,
       braidFactor,
       activeAlgorithms,
@@ -54,7 +53,7 @@ export const ArenaView: React.FC = () => {
 
   useEffect(() => {
     initEngine();
-  }, [mazeCols, mazeRows, goalPosition, braidFactor, activeAlgorithms, algorithmsList]);
+  }, [mazeSize, goalPosition, braidFactor, activeAlgorithms, algorithmsList]);
 
   // Discrete Step Simulation Timer: Controls how often a logical step happens
   useEffect(() => {
@@ -90,8 +89,8 @@ export const ArenaView: React.FC = () => {
   const handleReset = () => {
     if (engineRef.current) {
       engineRef.current.reset({
-        rows: mazeRows || 17,
-        cols: mazeCols || 29,
+        rows: mazeSize,
+        cols: mazeSize,
         goalPosition,
         braidFactor,
         activeAlgorithms,
@@ -109,26 +108,26 @@ export const ArenaView: React.FC = () => {
       : null;
 
   return (
-    <div className="space-y-3">
-      {/* Editorial Compact Header Banner */}
-      <div className="border border-black bg-white px-4 py-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-        <div className="flex items-center gap-3">
-          <h1 className="text-lg sm:text-xl font-black tracking-tight text-black font-sans uppercase">
-            Đấu Trường Mê Cung
-          </h1>
-          <span className="hidden md:inline text-neutral-300">|</span>
-          <div className="hidden md:flex items-center gap-2 text-[11px] font-mono tracking-wider uppercase text-neutral-500">
+    <div className="space-y-4">
+      {/* Editorial Hero Banner - Inspired by OmniMail Reference Photo */}
+      <div className="border border-black bg-white p-6 flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-2 text-[11px] font-mono tracking-widest uppercase text-neutral-500">
+            <span>MÔ PHỎNG THI ĐẤU</span>
+            <span>·</span>
             <span>TÌM ĐƯỜNG TỐI ƯU</span>
             <span>·</span>
-            <span>BẢN ĐỒ RỘNG NGANG ({mazeCols || 29}×{mazeRows || 17})</span>
-            <span>·</span>
-            <span>60 FPS</span>
+            <span>GIẢM THIỂU GÓC CUA</span>
           </div>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-black font-sans">
+            Đấu trường Mê cung.
+            <span className="block text-neutral-400 font-serif italic font-normal">Một đường đi ngắn nhất.</span>
+          </h1>
         </div>
 
         <button
           onClick={() => setIsAddAlgoOpen(true)}
-          className="px-4 py-1.5 bg-black text-white hover:bg-neutral-800 text-xs font-mono font-bold tracking-wider uppercase transition shadow-xs shrink-0"
+          className="px-6 py-2.5 bg-black text-white hover:bg-neutral-800 text-xs font-mono font-bold tracking-wider uppercase transition shadow-xs"
         >
           + THÊM THUẬT TOÁN TỰ VIẾT →
         </button>
@@ -143,9 +142,9 @@ export const ArenaView: React.FC = () => {
       />
 
       {/* Main Grid: Maze Visualizer + Scoreboard/Telemetry */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left: Maze Canvas Frame */}
-        <div className="lg:col-span-8 xl:col-span-8 flex flex-col items-center justify-center p-2.5 bg-white border border-black">
+        <div className="lg:col-span-8 flex flex-col items-center justify-center p-4 bg-white border border-black">
           <SimulationCanvas
             tickData={tickData}
             selectedRobotId={selectedRobotId}
@@ -153,12 +152,12 @@ export const ArenaView: React.FC = () => {
             showExploredHeatmap={showHeatmap}
             smoothCorners={smoothCorners}
             fogOfWar={fogOfWar}
-            width={880}
-            height={520}
+            width={720}
+            height={720}
           />
 
           {/* Minimalist Visual Toggles */}
-          <div className="flex flex-wrap items-center justify-between w-full max-w-[880px] mt-2 pt-2 border-t border-neutral-200 text-xs font-mono gap-2">
+          <div className="flex flex-wrap items-center justify-between w-full max-w-[720px] mt-3 pt-3 border-t border-neutral-200 text-xs font-mono gap-2">
             <div className="flex items-center gap-4 flex-wrap">
               <label className="flex items-center gap-1.5 cursor-pointer text-neutral-700 hover:text-black">
                 <input
@@ -191,9 +190,9 @@ export const ArenaView: React.FC = () => {
         </div>
 
         {/* Right: Tournament Scoreboard & Telemetry */}
-        <div className="lg:col-span-4 xl:col-span-4 flex flex-col gap-3">
+        <div className="lg:col-span-4 flex flex-col gap-4">
           {/* Scoreboard */}
-          <div className="flex-1">
+          <div className="flex-1 min-h-[380px]">
             <MatchScoreboard
               robots={tickData?.robots || []}
               selectedRobotId={selectedRobotId}

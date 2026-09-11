@@ -19,8 +19,8 @@ export const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
   showExploredHeatmap = true,
   smoothCorners = true,
   fogOfWar = false,
-  width = 880,
-  height = 520,
+  width = 720,
+  height = 720,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -313,11 +313,10 @@ export const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
 
       let offsetX = 0;
       let offsetY = 0;
-      // Enlarged base radius so mouse is immediately prominent and easy to spot
-      let radius = Math.max(7.5, cellSize * 0.42);
+      let radius = Math.max(4.5, cellSize * 0.35);
 
       if (totalInCell > 1) {
-        radius = Math.max(5.5, cellSize * 0.28); // Scale slightly to fit comfortably without collision
+        radius = Math.max(3.5, cellSize * 0.23); // Scale down to fit comfortably in the cell
         if (totalInCell === 2) {
           const shift = cellSize * 0.20;
           offsetX = botIndexInCell === 0 ? -shift : shift;
@@ -347,188 +346,105 @@ export const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
       ctx.save();
       ctx.translate(center.x, center.y);
 
-      // 1. Selection crosshair brackets & glowing reticle
+      // Selection square highlight
       if (isSelected) {
-        ctx.save();
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 1.5;
-        ctx.setLineDash([3, 3]);
-        const boxSize = radius + 6;
-        ctx.strokeRect(-boxSize, -boxSize, boxSize * 2, boxSize * 2);
+        ctx.setLineDash([2, 2]);
+        ctx.strokeRect(-radius - 3, -radius - 3, (radius + 3) * 2, (radius + 3) * 2);
         ctx.setLineDash([]);
-
-        // High-contrast corner brackets
-        ctx.strokeStyle = robot.color;
-        ctx.lineWidth = 2.5;
-        const cornerLen = 5;
-        // Top-left
-        ctx.beginPath();
-        ctx.moveTo(-boxSize, -boxSize + cornerLen);
-        ctx.lineTo(-boxSize, -boxSize);
-        ctx.lineTo(-boxSize + cornerLen, -boxSize);
-        // Top-right
-        ctx.moveTo(boxSize - cornerLen, -boxSize);
-        ctx.lineTo(boxSize, -boxSize);
-        ctx.lineTo(boxSize, -boxSize + cornerLen);
-        // Bottom-left
-        ctx.moveTo(-boxSize, boxSize - cornerLen);
-        ctx.lineTo(-boxSize, boxSize);
-        ctx.lineTo(-boxSize + cornerLen, boxSize);
-        // Bottom-right
-        ctx.moveTo(boxSize - cornerLen, boxSize);
-        ctx.lineTo(boxSize, boxSize);
-        ctx.lineTo(boxSize, boxSize - cornerLen);
-        ctx.stroke();
-        ctx.restore();
       }
 
       // Heading rotation
       ctx.rotate(current.angle);
 
-      // 2. High-Tech Micromouse Anatomy: Rubber Drive Wheels (Left & Right)
-      ctx.save();
-      ctx.fillStyle = '#0f172a';
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 1;
-      // Left wheel/track
-      ctx.beginPath();
-      ctx.roundRect(-radius * 0.85, -radius * 0.95, radius * 1.7, radius * 0.32, 2);
-      ctx.fill();
-      ctx.stroke();
-      // Right wheel/track
-      ctx.beginPath();
-      ctx.roundRect(-radius * 0.85, radius * 0.63, radius * 1.7, radius * 0.32, 2);
-      ctx.fill();
-      ctx.stroke();
-      ctx.restore();
-
-      // 3. Crisp White Halo & Soft Drop Shadow (Guarantees mouse never blends into walls or trails)
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-      ctx.shadowBlur = 4;
-      ctx.shadowOffsetX = 1;
-      ctx.shadowOffsetY = 1;
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 3.5;
-      ctx.beginPath();
-      ctx.roundRect(-radius * 0.85, -radius * 0.62, radius * 1.7, radius * 1.24, 3);
-      ctx.stroke();
-      ctx.restore();
-
-      // 4. Main Robot Chassis Body
+      // Sleek Geometric Robot Body
       ctx.fillStyle = robot.color;
       ctx.beginPath();
-      ctx.roundRect(-radius * 0.85, -radius * 0.62, radius * 1.7, radius * 1.24, 3);
+      ctx.roundRect(-radius * 0.9, -radius * 0.7, radius * 1.8, radius * 1.4, 2);
       ctx.fill();
       ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 1;
       ctx.stroke();
 
-      // 5. Front Aerodynamic Sensor Snout (Nose wedge pointing forward)
+      // Front sensor direction pointer
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.moveTo(radius * 1.1, 0);
-      ctx.lineTo(radius * 0.3, -radius * 0.45);
-      ctx.lineTo(radius * 0.45, 0);
-      ctx.lineTo(radius * 0.3, radius * 0.45);
+      ctx.moveTo(radius * 0.6, 0);
+      ctx.lineTo(-radius * 0.2, -radius * 0.4);
+      ctx.lineTo(-radius * 0.2, radius * 0.4);
       ctx.closePath();
       ctx.fill();
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 1;
-      ctx.stroke();
 
-      // 6. Dual Infrared Optical Sensor Eyes (Red front sensors)
-      ctx.fillStyle = '#ef4444';
-      ctx.beginPath();
-      ctx.arc(radius * 0.6, -radius * 0.32, Math.max(1.2, radius * 0.12), 0, Math.PI * 2);
-      ctx.arc(radius * 0.6, radius * 0.32, Math.max(1.2, radius * 0.12), 0, Math.PI * 2);
-      ctx.fill();
-
-      // 7. Onboard CPU Core Indicator Dot
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(-radius * 0.1, 0, Math.max(2, radius * 0.18), 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      // 8. Active Sensor Scanner Beams (Forward laser radar + side wall sensors)
+      // Active Sensor Scanner Beams (Chùm tia quét cảm biến tường trực tiếp)
       ctx.save();
-      ctx.strokeStyle = robot.color;
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([3, 2]);
-
-      // Tia quét laser phía trước (Front Laser Ray)
-      const frontRayLength = cellSize * 0.75;
-      ctx.beginPath();
-      ctx.moveTo(radius * 1.1, 0);
-      ctx.lineTo(radius * 1.1 + frontRayLength, 0);
-      ctx.stroke();
-
-      // Laser dot contact point
-      ctx.fillStyle = robot.color;
-      ctx.beginPath();
-      ctx.arc(radius * 1.1 + frontRayLength, 0, 2, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Side wall proximity sensing rays
-      ctx.strokeStyle = `${robot.color}99`;
+      ctx.strokeStyle = `${robot.color}88`;
       ctx.lineWidth = 1;
       ctx.setLineDash([2, 2]);
+
+      // Tia quét phía trước (Front Ray)
       ctx.beginPath();
-      ctx.moveTo(0, -radius * 0.95);
-      ctx.lineTo(0, -radius * 0.95 - cellSize * 0.5);
-      ctx.moveTo(0, radius * 0.95);
-      ctx.lineTo(0, radius * 0.95 + cellSize * 0.5);
+      ctx.moveTo(radius * 0.9, 0);
+      ctx.lineTo(radius * 0.9 + cellSize * 0.65, 0);
+      ctx.stroke();
+
+      // Tia quét sườn trái (Left Ray)
+      ctx.beginPath();
+      ctx.moveTo(0, -radius * 0.7);
+      ctx.lineTo(0, -radius * 0.7 - cellSize * 0.55);
+      ctx.stroke();
+
+      // Tia quét sườn phải (Right Ray)
+      ctx.beginPath();
+      ctx.moveTo(0, radius * 0.7);
+      ctx.lineTo(0, radius * 0.7 + cellSize * 0.55);
       ctx.stroke();
       ctx.restore();
 
       ctx.restore();
 
-      // 9. Floating Name Tag badge (Always shown if selected, or pulsed for all bots)
+      // 7. Floating Name Tag badge above robot every 5 seconds (visible for 2.2s every 5s cycle)
       const now = Date.now();
-      const isNameTagVisible = isSelected || (now % 4000) < 2400;
+      const isNameTagVisible = (now % 5000) < 2200;
       if (isNameTagVisible) {
         ctx.save();
-        const labelText = isSelected ? `[ĐANG CHỌN] ${robot.name}` : robot.name;
+        const labelText = robot.name;
         ctx.font = 'bold 10px monospace, sans-serif';
         const textMetrics = ctx.measureText(labelText);
-        const badgeWidth = textMetrics.width + 16;
-        const badgeHeight = 19;
+        const badgeWidth = textMetrics.width + 14;
+        const badgeHeight = 18;
         const badgeX = center.x - badgeWidth / 2;
-        const badgeY = center.y - radius - 22;
+        const badgeY = center.y - radius - 20;
 
         // Drop shadow
-        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
         ctx.fillRect(badgeX + 1.5, badgeY + 1.5, badgeWidth, badgeHeight);
 
         // Badge body
-        ctx.fillStyle = isSelected ? '#000000' : '#ffffff';
+        ctx.fillStyle = '#ffffff';
         ctx.fillRect(badgeX, badgeY, badgeWidth, badgeHeight);
         ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 1.2;
+        ctx.lineWidth = 1;
         ctx.strokeRect(badgeX, badgeY, badgeWidth, badgeHeight);
 
         // Arrow notch pointing to mouse
         ctx.beginPath();
-        ctx.moveTo(center.x - 3.5, badgeY + badgeHeight);
-        ctx.lineTo(center.x + 3.5, badgeY + badgeHeight);
-        ctx.lineTo(center.x, badgeY + badgeHeight + 3.5);
+        ctx.moveTo(center.x - 3, badgeY + badgeHeight);
+        ctx.lineTo(center.x + 3, badgeY + badgeHeight);
+        ctx.lineTo(center.x, badgeY + badgeHeight + 3);
         ctx.closePath();
-        ctx.fillStyle = isSelected ? '#000000' : '#ffffff';
+        ctx.fillStyle = '#000000';
         ctx.fill();
-        ctx.stroke();
 
         // Color indicator bar
         ctx.fillStyle = robot.color;
-        ctx.fillRect(badgeX + 3, badgeY + 4, 3.5, 11);
+        ctx.fillRect(badgeX + 3, badgeY + 4, 3, 10);
 
         // Text
-        ctx.fillStyle = isSelected ? '#ffffff' : '#000000';
+        ctx.fillStyle = '#000000';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText(labelText, badgeX + 10, badgeY + badgeHeight / 2);
+        ctx.fillText(labelText, badgeX + 9, badgeY + badgeHeight / 2);
         ctx.restore();
       }
     }
@@ -568,11 +484,7 @@ export const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
       width={width}
       height={height}
       onClick={handleCanvasClick}
-      style={{
-        maxHeight: 'min(530px, calc(100vh - 220px))',
-        aspectRatio: `${width} / ${height}`,
-      }}
-      className="border-2 border-black bg-white cursor-pointer w-full h-auto object-contain shadow-xs"
+      className="border-2 border-black bg-white cursor-pointer max-w-full h-auto aspect-square shadow-sm"
     />
   );
 };
