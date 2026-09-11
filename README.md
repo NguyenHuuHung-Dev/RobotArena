@@ -1,165 +1,165 @@
 <div align="center">
+  <img src="frontend/apps/web/public/logo.png" alt="RobotArena logo" width="88" height="88" />
+  <h1>RobotArena</h1>
+  <p><strong>Real-time algorithmic maze arena & multi-agent tournament platform.</strong></p>
+  <p>An esports-grade competition system for autonomous maze-solving agents—powered by .NET 10, SignalR, and SQL Server.</p>
 
-<img src="./frontend/apps/web/public/logo.png" alt="RobotArena Logo" width="120" />
+  <p>
+    <a href="#quick-start"><strong>Quick start</strong></a>
+    ·
+    <a href="#main-features">Main features</a>
+    ·
+    <a href="#architecture">Architecture</a>
+    ·
+    <a href="#test-accounts">Test accounts</a>
+  </p>
 
-# 🤖 RobotArena
-### Real-Time Algorithmic Maze Arena & Multi-Agent Tournament Platform
-
-[![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-[![C#](https://img.shields.io/badge/C%23-13.0-239120?style=for-the-badge&logo=c-sharp&logoColor=white)](https://docs.microsoft.com/dotnet/csharp/)
-[![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-6.2-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![TailwindCSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![SQL Server](https://img.shields.io/badge/SQL_Server-2022-CC292B?style=for-the-badge&logo=microsoftsqlserver&logoColor=white)](https://www.microsoft.com/sql-server)
-[![SignalR](https://img.shields.io/badge/SignalR-Realtime-512BD4?style=for-the-badge&logo=signalr&logoColor=white)](https://dotnet.microsoft.com/apps/aspnet/signalr)
-
-<p align="center">
-  <b>Hệ thống thi đấu giải thuật Robot Mê Cung (Micromouse) trực tuyến thời gian thực</b><br/>
-  <i>Mô phỏng vật lý thực tế • Sương mù chiến thuật (Fog of War) • Chống gian lận Sandbox • Đấu Online 2-5 người</i>
-</p>
-
-[Tính Năng Nổi Bật](#-tính-năng-nổi-bật) •
-[Cài Đặt & Chạy](#-cài-đặt--khởi-chạy-nhanh) •
-[Tài Khoản Dùng Thử](#-tài-khoản-dùng-thử) •
-[Kiến Trúc](#-kiến-trúc-hệ-thống) •
-[Tác Giả](#-tác-giả-author)
-
+  <p>
+    <img alt=".NET 10" src="https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white" />
+    <img alt="C#" src="https://img.shields.io/badge/C%23-13-239120?logo=csharp&logoColor=white" />
+    <img alt="React" src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=111" />
+    <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white" />
+    <img alt="Vite" src="https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white" />
+    <img alt="TailwindCSS" src="https://img.shields.io/badge/Tailwind-3-06B6D4?logo=tailwindcss&logoColor=white" />
+    <img alt="SQL Server" src="https://img.shields.io/badge/SQL_Server-2022-CC292B?logo=microsoftsqlserver&logoColor=white" />
+    <img alt="SignalR" src="https://img.shields.io/badge/SignalR-Realtime-512BD4?logo=signalr&logoColor=white" />
+  </p>
 </div>
 
 ---
 
-## 🌟 Tính Năng Nổi Bật
+## Overview
 
-| Tính Năng | Mô Tả Kỹ Thuật |
-| :--- | :--- |
-| 🏁 **Đấu Online 2 - 5 Người** | Kết nối thời gian thực qua **SignalR Hub**, sảnh chờ tự động, đồng hồ 10s khóa thuật toán và bảng xếp hạng live. |
-| 🧠 **8 Thuật Toán Đỉnh Cao** | A* Phạt Cua, A* Chuẩn Manhattan, Micromouse Flood Fill IEEE, Dijkstra OSPF, Tham Lam GBFS, Trémaux DFS Backtracking, Bám Tường Trái/Phải. |
-| 🛡️ **Anti-Cheat & Sương Mù** | Cơ chế **Fog of War** che khuất mê cung. Triệt tiêu `fullMazeMap`, buộc robot phải tự vẽ bản đồ trong não và khám phá mù vật lý. |
-| 💻 **Monaco Code Studio** | Lập trình giải thuật trực tiếp trên web bằng TypeScript, kiểm tra cú pháp AST tĩnh, lưu và xóa thuật toán cá nhân qua `localStorage`. |
-| 🏆 **Lưu Trữ Thành Tích** | Tích hợp **Microsoft SQL Server**, lưu giữ vĩnh viễn lịch sử thi đấu, số bước đi, thời gian hoàn thành (ms) và bảng xếp hạng ELO. |
+RobotArena is a real-time algorithmic competition platform inspired by international micromouse tournaments. Autonomous software robots navigate unknown, dynamically generated mazes to reach destination targets under strict sensor limits and real-time multiplayer constraints.
 
----
+The project is architected as a modern monorepo combining a high-performance **.NET 10 backend** (Clean Architecture, ASP.NET Core API, SignalR real-time hubs, Entity Framework Core) with an interactive **React & TypeScript frontend** featuring an in-browser Monaco code studio and deterministic simulation canvas.
 
-## 📋 Yêu Cầu Hệ Thống (Prerequisites)
+### Why RobotArena?
 
-* **.NET SDK 10** (hoặc .NET 8+) &bull; [Tải về](https://dotnet.microsoft.com/download)
-* **Node.js >= 18** (Khuyên dùng Node 20+) &bull; [Tải về](https://nodejs.org/)
-* **pnpm >= 9** (Bắt buộc dùng pnpm cho monorepo workspace):
-  ```bash
-  npm install -g pnpm
-  ```
-* **Microsoft SQL Server** (LocalDB hoặc SQL Server Express / Developer) đang chạy ở `localhost`.
+- **Real multiplayer competition**: 2 to 5 concurrent players per room with synchronized start countdowns and live telemetry.
+- **Zero-knowledge exploration**: Strict fog-of-war rules prevent robots from accessing global maze topography; agents must perceive, map, and reason solely through localized wall sensors.
+- **Fair play & anti-cheat engine**: Code execution runs within isolated sandboxes, statically linted to ban unauthorized DOM, network, and reflection globals.
+- **Micro-turn penalty mechanics**: Evaluates shortest path, step count, and directional change penalties to simulate realistic micromouse momentum.
+- **Persistent historical records**: All match results, player statistics, and leaderboard standings are stored durably in Microsoft SQL Server.
 
 ---
 
-## 🚀 Cài Đặt & Khởi Chạy Nhanh
+## Main features
 
-Khởi động hệ thống chỉ với **2 cửa sổ Terminal** ngay tại thư mục gốc:
+| Area | Technical implementation |
+| --- | --- |
+| Multiplayer matches | Real-time room orchestration, 10-second algorithm selection lock, SignalR state broadcasting |
+| Algorithm catalog | Manhattan A*, Penalty-aware A*, Micromouse Flood Fill, Dijkstra, Greedy Best-First, Trémaux DFS Backtracking, Wall Follower |
+| Sensor simulation | Local wall proximity (`adjacentWalls`), viable unblocked cells (`availableNeighbors`), destination coordinate (`goal`) |
+| In-browser IDE | Embedded Monaco code editor with TypeScript autocompletion, live syntax diagnostics, and local storage persistence |
+| Leaderboard & stats | Comprehensive match history, step duration metrics (ms), ELO calculations, and SQL Server persistence |
+| Anti-cheat guard | Static AST validation restricting forbidden globals (`eval`, `window`, `document`, `fullMazeMap`) |
 
-### 🔹 Terminal 1: Chạy Backend API (.NET 10 & SignalR Hub)
+---
+
+## Architecture
+
+```mermaid
+flowchart LR
+  U[Browser Client] -->|HTTP / REST| API[ASP.NET Core API]
+  U <-->|WebSocket / SignalR| HUB[ArenaHub]
+  API --> APP[Application Core]
+  HUB --> APP
+  APP --> SIM[Simulation & Room Engine]
+  APP --> EF[EF Core DbContext]
+  EF --> DB[(Microsoft SQL Server)]
+  SIM --> SB[Deterministic Sandbox]
+```
+
+### Request and event flow
+
+1. **Authentication & Room Registration**: Players authenticate via JWT and join rooms managed in-memory by the .NET `RoomManager`.
+2. **Algorithm Strategy Lock**: A synchronized 10-second countdown gives players time to pick or compile their custom algorithm.
+3. **Simulation Loop**: The arena executes deterministic tick events, querying player robot logic with localized sensor data.
+4. **State Broadcast**: Real-time position updates, fog-of-war reveals, and turn statistics stream to all participants via SignalR.
+5. **Score Finalization**: Match summaries, step counts, and winner determinations are saved directly to SQL Server.
+
+---
+
+## Quick start
+
+Run the entire system using **2 terminal windows** from the workspace root:
+
+### Terminal 1: Backend API (.NET 10 & SignalR)
+
 ```bash
-# Chạy với chế độ Hot-Reload (tự biên dịch lại khi sửa code C#)
+# Run with Hot-Reload (recompiles automatically on C# file changes)
 dotnet watch --project backend/RobotArena.API/RobotArena.API.csproj
 
-# Hoặc dùng lệnh tắt npm/pnpm từ thư mục gốc:
+# Or use the root package script
 pnpm api:watch
 ```
-* 🌐 **API Server:** `http://localhost:5200`
-* 📑 **Swagger UI:** `http://localhost:5200/swagger`
-* ⚡ **SignalR Hub:** `http://localhost:5200/hub/arena`
-> *Lưu ý: Database `RobotArenaDB` sẽ được tự động khởi tạo trên SQL Server khi backend chạy lần đầu tiên.*
 
-### 🔹 Terminal 2: Chạy Frontend (React + Vite App)
+- API Server: `http://localhost:5200`
+- Swagger Documentation: `http://localhost:5200/swagger`
+- SignalR Hub: `http://localhost:5200/hub/arena`
+
+> Note: The `RobotArenaDB` database will automatically migrate and initialize on SQL Server during the first backend launch.
+
+### Terminal 2: Frontend Web App (React + Vite)
+
 ```bash
-# Cài đặt dependencies (nếu chạy lần đầu)
+# Install workspace dependencies (first run only)
 pnpm install
 
-# Khởi chạy giao diện Web
+# Start development server
 pnpm dev
 ```
-* 🖥️ **Web Application:** `http://localhost:3000`
+
+- Web Interface: `http://localhost:3000`
 
 ---
 
-## 🔑 Tài Khoản Dùng Thử
+## Test accounts
 
-Bạn có thể tạo tài khoản mới ngay trên giao diện hoặc đăng nhập với các tài khoản test sau:
+Pre-configured accounts for testing match lobbies and multiplayer simulation:
 
-| Tên Đăng Nhập | Mật Khẩu | Tên Hiển Thị (Racer Name) | Màu Robot |
+| Username | Password | Display name | Color |
 | :---: | :---: | :--- | :---: |
-| `player1` | `123456` | Chuột Bão Tố | ⚫ Đen Tuyển |
-| `player2` | `123456` | Thần Tốc Độ | 🔴 Đỏ Huyết |
+| `player1` | `123456` | Chuột Bão Tố | Black |
+| `player2` | `123456` | Thần Tốc Độ | Red |
 
 ---
 
-## 🛠️ Lệnh Kiểm Thử & Đóng Gói (Build & Test)
-
-```bash
-# Build kiểm tra lỗi toàn bộ Backend
-dotnet build
-
-# Build kiểm tra toàn bộ Frontend (Web + Shared Packages)
-cd frontend
-pnpm build
-
-# Kiểm tra cú pháp TypeScript & Lint
-pnpm --filter web lint
-```
-
----
-
-## 📁 Kiến Trúc Hệ Thống
-
-Dự án được phân tầng rõ ràng theo chuẩn **Clean Architecture** và **Monorepo pnpm Workspace**:
+## Project structure
 
 ```text
 RobotArena/
-│
 ├── backend/                       # .NET 10 Clean Architecture Solution
-│   ├── RobotArena.API/            # Controllers, SignalR ArenaHub, Swagger Docs
-│   ├── RobotArena.Application/    # DTOs, RoomManager, Business Services
-│   ├── RobotArena.Domain/         # Domain Models (TaiKhoan, NguoiChoi, TranDau, ThanhTich)
-│   ├── RobotArena.Infrastructure/ # EF Core DbContext, SQL Server Configuration
-│   ├── RobotArena.Simulation/     # Physics & deterministic tick engine
+│   ├── RobotArena.API/            # Controllers, SignalR ArenaHub, Swagger docs
+│   ├── RobotArena.Application/    # DTOs, RoomManager, business services
+│   ├── RobotArena.Domain/         # Domain entities (TaiKhoan, NguoiChoi, TranDau, ThanhTich)
+│   ├── RobotArena.Infrastructure/ # EF Core DbContext, SQL Server migrations
+│   ├── RobotArena.Simulation/     # Deterministic simulation tick engine
 │   └── RobotArena.Sandbox/        # Isolated script execution environment
 │
-├── frontend/                      # Monorepo pnpm Workspace
+├── frontend/                      # Monorepo pnpm workspace
 │   ├── apps/
 │   │   └── web/                   # React 18 + Vite SPA, Monaco Editor, Tailwind
-│   │
-│   ├── packages/
-│   │   ├── shared-types/          # Shared Models giữa Frontend & Backend
-│   │   ├── simulation-types/      # Định nghĩa Sensors, Actions, Match Events
-│   │   └── robot-sdk/             # Thư viện lập trình thuật toán (@robot-arena/robot-sdk)
-│   │
-│   ├── package.json               # Root Workspace Scripts
-│   └── pnpm-workspace.yaml        # Workspace Package Mapping
+│   └── packages/
+│       ├── shared-types/          # Shared DTOs between Frontend & Backend
+│       ├── simulation-types/      # Sensor definitions, actions, match events
+│       └── robot-sdk/             # Official algorithm SDK (@robot-arena/robot-sdk)
 │
-├── RobotArena.slnx                # .NET 10 Solution File
+├── package.json                   # Root workspace scripts
+├── pnpm-workspace.yaml            # Monorepo workspace config
+├── RobotArena.slnx                # .NET 10 solution file
 └── README.md
 ```
 
 ---
 
-## 🛡️ Hệ Thống Chống Gian Lận (Anti-Cheat)
-
-Trong các giải đấu thuật toán mê cung quốc tế (như *IEEE Micromouse*), mọi robot đều phải khám phá ẩn số:
-
-1. **Zero-Knowledge Sensor Sandbox**: Payload truyền vào robot chỉ gồm các cảm biến cục bộ (`adjacentWalls`, `availableNeighbors`, `goal`). Trường bản đồ toàn cảnh `fullMazeMap` đã bị vô hiệu hóa hoàn toàn.
-2. **Static Code Guard**: Monaco Editor tự động phân tích mã nguồn người chơi trước khi biên dịch, chặn đứng các hành vi đọc lén bản đồ hay chèn mã độc hại (`eval`, `window`, `document`, `fullMazeMap`).
-3. **Internal Memory Navigation**: Robot phải tự lưu nhớ các bức tường và ô đã khám phá vào bộ nhớ nội tại để đưa ra quyết định di chuyển chính xác và công bằng.
-
----
-
-## 👤 Tác Giả (Author)
+## Author
 
 <div align="center">
 
 **NguyenHuuHung**  
-🔗 GitHub: [@NguyenHuuHung-Dev](https://github.com/NguyenHuuHung-Dev)  
-📦 Repository: [https://github.com/NguyenHuuHung-Dev/RobotArena](https://github.com/NguyenHuuHung-Dev/RobotArena)
+GitHub: [@NguyenHuuHung-Dev](https://github.com/NguyenHuuHung-Dev)  
+Repository: [https://github.com/NguyenHuuHung-Dev/RobotArena](https://github.com/NguyenHuuHung-Dev/RobotArena)
 
 </div>
-
-
