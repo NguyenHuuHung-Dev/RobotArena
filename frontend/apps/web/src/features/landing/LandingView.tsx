@@ -31,6 +31,7 @@ export const LandingView: React.FC = () => {
           {/* Left Column: Headline, Description & Actions */}
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center gap-2 text-xs font-mono tracking-widest uppercase text-neutral-600 bg-neutral-100 border border-neutral-300 px-3 py-1">
+              <img src="/logo.png" alt="RobotArena Logo" className="w-4 h-4 object-contain" />
               <span>ROBOTARENA · ESPORTS THI ĐẤU LẬP TRÌNH THỜI GIAN THỰC</span>
             </div>
 

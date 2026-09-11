@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/backend/">
+    <Project Path="backend/RobotArena.API/RobotArena.API.csproj" />
+    <Project Path="backend/RobotArena.Application/RobotArena.Application.csproj" />
+    <Project Path="backend/RobotArena.Domain/RobotArena.Domain.csproj" />
+    <Project Path="backend/RobotArena.Infrastructure/RobotArena.Infrastructure.csproj" />
+  </Folder>
+</Solution>

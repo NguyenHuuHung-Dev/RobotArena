@@ -8,6 +8,8 @@
     "build": "pnpm --dir frontend build",
     "lint": "pnpm --dir frontend lint",
     "test": "pnpm --dir frontend test",
+    "api": "dotnet run --project backend/RobotArena.API/RobotArena.API.csproj",
+    "api:watch": "dotnet watch --project backend/RobotArena.API/RobotArena.API.csproj",
     "install:frontend": "pnpm --dir frontend install",
     "postinstall": "pnpm --dir frontend install"
   }

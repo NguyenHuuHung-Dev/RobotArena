@@ -13,13 +13,20 @@ export const App: React.FC = () => {
       <header className="sticky top-0 z-40 border-b border-black bg-white">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
           {/* Brand Logo */}
-          <Link to="/" className="flex items-baseline gap-2 shrink-0 group">
-            <h1 className="font-black text-lg sm:text-xl tracking-tight text-black font-sans uppercase">
-              RobotArena<span className="text-rose-600">.</span>
-            </h1>
-            <span className="text-[10px] font-mono tracking-wider text-neutral-400 uppercase hidden lg:inline">
-              Mê Cung
-            </span>
+          <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
+            <img
+              src="/logo.png"
+              alt="RobotArena Logo"
+              className="w-8 h-8 object-contain rounded-sm group-hover:scale-105 transition-transform"
+            />
+            <div className="flex items-baseline gap-1.5">
+              <h1 className="font-black text-lg sm:text-xl tracking-tight text-black font-sans uppercase">
+                RobotArena<span className="text-rose-600">.</span>
+              </h1>
+              <span className="text-[10px] font-mono tracking-wider text-neutral-400 uppercase hidden lg:inline">
+                Mê Cung
+              </span>
+            </div>
           </Link>
 
           {/* Clean Primary Navigation */}
@@ -184,7 +191,10 @@ export const App: React.FC = () => {
       {/* Minimalist Footer */}
       <footer className="border-t border-black py-4 bg-white text-neutral-500 text-xs font-mono">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div>ROBOTARENA · HỆ THỐNG THI ĐẤU THUẬT TOÁN MÊ CUNG (.NET 10 + SQL SERVER)</div>
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="RobotArena Logo" className="w-4 h-4 object-contain" />
+            <span>ROBOTARENA · HỆ THỐNG THI ĐẤU THUẬT TOÁN MÊ CUNG (.NET 10 + SQL SERVER)</span>
+          </div>
           <div className="flex items-center gap-3 text-neutral-600">
             <span>2-5 ĐẤU THỦ ONLINE</span>
             <span>·</span>

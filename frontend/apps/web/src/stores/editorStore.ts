@@ -230,12 +230,12 @@ export default defineMazeSolver({
 
   onStep(sensor) {
     const { position, availableNeighbors } = sensor;
-    const key = `${position.row},${position.col}`;
+    const key = \`\${position.row},\${position.col}\`;
     this.visited.add(key);
 
     // Tìm các lối rẽ chưa từng đặt chân đến
     const unvisited = availableNeighbors.filter(
-      (n) => !this.visited.has(`${n.row},${n.col}`)
+      (n) => !this.visited.has(\`\${n.row},\${n.col}\`)
     );
 
     if (unvisited.length > 0) {
