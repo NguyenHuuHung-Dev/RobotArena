@@ -169,14 +169,17 @@ export const ArenaView: React.FC = () => {
                 <span>VÙNG ĐÃ DUYỆT (HEATMAP)</span>
               </label>
 
-              <label className="flex items-center gap-1.5 cursor-pointer text-neutral-700 hover:text-black">
+              <label
+                className="flex items-center gap-1.5 cursor-pointer text-neutral-700 hover:text-black"
+                title="Chuột luôn khám phá mù 100% bằng cảm biến. Tùy chọn này chuyển giữa góc nhìn hạn chế của Chuột và góc nhìn Toàn cảnh của Khán giả"
+              >
                 <input
                   type="checkbox"
                   checked={fogOfWar}
                   onChange={(e) => setFogOfWar(e.target.checked)}
                   className="rounded-none border-black text-black focus:ring-0"
                 />
-                <span>SƯƠNG MÙ KHÁM PHÁ (FOG OF WAR)</span>
+                <span>CHE TỐI SƯƠNG MÙ (GÓC NHÌN CHUỘT)</span>
               </label>
             </div>
 

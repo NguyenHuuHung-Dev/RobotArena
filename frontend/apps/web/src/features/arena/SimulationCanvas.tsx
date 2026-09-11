@@ -109,17 +109,29 @@ export const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
       for (let c = 0; c < cols; c++) {
         const x = startX + c * cellSize;
         const y = startY + r * cellSize;
-        const isRevealed = !fogOfWar || revealedCells.has(`${r},${c}`);
-
-        if (isRevealed) {
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(x, y, cellSize, cellSize);
+        const hasBeenExplored = revealedCells.has(`${r},${c}`);
+        if (fogOfWar) {
+          if (hasBeenExplored) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(x, y, cellSize, cellSize);
+          } else {
+            // Sương mù che phủ vùng chưa biết (Dark Blueprint)
+            ctx.fillStyle = '#18181b';
+            ctx.fillRect(x, y, cellSize, cellSize);
+            ctx.fillStyle = '#27272a';
+            ctx.fillRect(x + cellSize / 2 - 1, y + cellSize / 2 - 1, 2, 2);
+          }
         } else {
-          // Sương mù che phủ vùng chưa biết (Dark Blueprint)
-          ctx.fillStyle = '#18181b';
-          ctx.fillRect(x, y, cellSize, cellSize);
-          ctx.fillStyle = '#27272a';
-          ctx.fillRect(x + cellSize / 2 - 1, y + cellSize / 2 - 1, 2, 2);
+          // Góc nhìn toàn cảnh (Khán giả): Vùng chuột chưa khám phá được hiển thị xám mờ
+          if (hasBeenExplored) {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(x, y, cellSize, cellSize);
+          } else {
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(x, y, cellSize, cellSize);
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(x + cellSize / 2 - 1, y + cellSize / 2 - 1, 2, 2);
+          }
         }
       }
     }
@@ -135,11 +147,11 @@ export const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
     ctx.lineWidth = 1.5;
     ctx.strokeRect(sx + 1, sy + 1, cellSize - 2, cellSize - 2);
 
-    // Goal Zone
+    // Goal Zone (Chỉ bừng sáng khi chuột đã thực sự dò quét tới đích)
     const goalPos = maze.goal;
     const gx = startX + goalPos.col * cellSize;
     const gy = startY + goalPos.row * cellSize;
-    const isGoalRevealed = !fogOfWar || revealedCells.has(`${goalPos.row},${goalPos.col}`);
+    const isGoalRevealed = revealedCells.has(`${goalPos.row},${goalPos.col}`);
 
     if (isGoalRevealed) {
       ctx.fillStyle = '#fffbeb';
@@ -150,7 +162,9 @@ export const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
     } else {
       ctx.strokeStyle = '#d9770660';
       ctx.lineWidth = 1;
+      ctx.setLineDash([2, 2]);
       ctx.strokeRect(gx + 2, gy + 2, cellSize - 4, cellSize - 4);
+      ctx.setLineDash([]);
     }
 
     // Sharp Typography Labels for S & G
@@ -361,6 +375,31 @@ export const SimulationCanvas: React.FC<SimulationCanvasProps> = ({
       ctx.lineTo(-radius * 0.2, radius * 0.4);
       ctx.closePath();
       ctx.fill();
+
+      // Active Sensor Scanner Beams (Chùm tia quét cảm biến tường trực tiếp)
+      ctx.save();
+      ctx.strokeStyle = `${robot.color}88`;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 2]);
+
+      // Tia quét phía trước (Front Ray)
+      ctx.beginPath();
+      ctx.moveTo(radius * 0.9, 0);
+      ctx.lineTo(radius * 0.9 + cellSize * 0.65, 0);
+      ctx.stroke();
+
+      // Tia quét sườn trái (Left Ray)
+      ctx.beginPath();
+      ctx.moveTo(0, -radius * 0.7);
+      ctx.lineTo(0, -radius * 0.7 - cellSize * 0.55);
+      ctx.stroke();
+
+      // Tia quét sườn phải (Right Ray)
+      ctx.beginPath();
+      ctx.moveTo(0, radius * 0.7);
+      ctx.lineTo(0, radius * 0.7 + cellSize * 0.55);
+      ctx.stroke();
+      ctx.restore();
 
       ctx.restore();
 
