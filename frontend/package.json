@@ -2,7 +2,7 @@
   "name": "robot-arena",
   "author": "NguyenHuuHung",
   "private": true,
-  "packageManager": "pnpm@11.7.0",
+  "packageManager": "pnpm@9.15.5",
   "scripts": {
     "dev": "pnpm --filter web dev",
     "build": "pnpm --filter \"./packages/*\" build && pnpm --filter web build",

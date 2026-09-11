@@ -2,7 +2,7 @@
   "name": "robot-arena",
   "author": "NguyenHuuHung",
   "private": true,
-  "packageManager": "pnpm@11.7.0",
+  "packageManager": "pnpm@9.15.5",
   "scripts": {
     "dev": "pnpm --dir frontend dev",
     "build": "pnpm --dir frontend build",
@@ -10,7 +10,6 @@
     "test": "pnpm --dir frontend test",
     "api": "dotnet run --project backend/RobotArena.API/RobotArena.API.csproj",
     "api:watch": "dotnet watch --project backend/RobotArena.API/RobotArena.API.csproj",
-    "install:frontend": "pnpm --dir frontend install",
-    "postinstall": "pnpm --dir frontend install"
+    "install:frontend": "pnpm --dir frontend install"
   }
 }
