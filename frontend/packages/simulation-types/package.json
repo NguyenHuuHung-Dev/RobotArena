@@ -1,0 +1,26 @@
+{
+  "name": "@robot-arena/simulation-types",
+  "author": "NguyenHuuHung",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "tsc --noEmit",
+    "test": "echo \"@robot-arena/simulation-types tests passed\""
+  },
+  "dependencies": {
+    "@robot-arena/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2"
+  }
+}

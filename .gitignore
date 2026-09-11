@@ -1,0 +1,40 @@
+# Node / pnpm
+node_modules/
+.pnpm-store/
+dist/
+dist-ssr/
+*.local
+.npm
+.eslintcache
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Dotnet / C# / Backend
+bin/
+obj/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDEs and Editors
+.vscode/
+.idea/
+.vs/
+*.tsbuildinfo
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="RobotArena.API/RobotArena.API.csproj" />
+  <Project Path="RobotArena.Application/RobotArena.Application.csproj" />
+  <Project Path="RobotArena.Domain/RobotArena.Domain.csproj" />
+  <Project Path="RobotArena.Infrastructure/RobotArena.Infrastructure.csproj" />
+</Solution>

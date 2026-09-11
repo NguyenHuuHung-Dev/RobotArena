@@ -1,0 +1,14 @@
+{
+  "name": "robot-arena",
+  "author": "NguyenHuuHung",
+  "private": true,
+  "packageManager": "pnpm@11.7.0",
+  "scripts": {
+    "dev": "pnpm --dir frontend dev",
+    "build": "pnpm --dir frontend build",
+    "lint": "pnpm --dir frontend lint",
+    "test": "pnpm --dir frontend test",
+    "install:frontend": "pnpm --dir frontend install",
+    "postinstall": "pnpm --dir frontend install"
+  }
+}
