@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-export const API_BASE_URL = 'http://localhost:5200/api';
-export const HUB_URL = 'http://localhost:5200/hub/arena';
+const BACKEND_HOST = (import.meta.env.VITE_API_URL || 'http://localhost:5200').replace(/\/$/, '');
+export const API_BASE_URL = `${BACKEND_HOST}/api`;
+export const HUB_URL = `${BACKEND_HOST}/hub/arena`;
+export const SWAGGER_URL = `${BACKEND_HOST}/swagger`;
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

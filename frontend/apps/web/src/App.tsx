@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, Link, Outlet } from 'react-router-dom';
 import { useAuthStore } from './stores/useAuthStore';
 import { AuthModal } from './features/auth/AuthModal';
+import { SWAGGER_URL } from './services/api';
 
 export const App: React.FC = () => {
   const { user, setAuthModalOpen, logout } = useAuthStore();
@@ -125,7 +126,7 @@ export const App: React.FC = () => {
                     Thử Thách Mê Cung
                   </Link>
                   <a
-                    href="http://localhost:5200/swagger"
+                    href={SWAGGER_URL}
                     target="_blank"
                     rel="noreferrer"
                     className="block px-3 py-1.5 hover:bg-neutral-100 uppercase text-emerald-700 font-bold"
