@@ -180,73 +180,73 @@ export const LandingView: React.FC = () => {
             </div>
           </div>
 
-          {/* Game 2: Upcoming Battle Tank AI */}
-          <div className="border border-neutral-300 bg-neutral-50/70 p-6 flex flex-col justify-between space-y-4 hover:border-black transition">
+          {/* Game 2: Caro AI Arena */}
+          <div className="border-2 border-black bg-white p-6 flex flex-col justify-between space-y-4 hover:shadow-md transition">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 border border-neutral-400 text-neutral-600 uppercase">
-                  SẮP RA MẮT · 2 - 4 BOT
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-rose-600 text-white uppercase tracking-wider">
+                  MỚI RA MẮT · AI MINIMAX
                 </span>
                 <span className="text-xs font-mono text-neutral-400 font-bold">GAME #02</span>
               </div>
 
               <h3 className="text-xl font-bold uppercase text-black font-sans">
-                Xe Tăng Radar AI (Battle Tank)
+                Cờ Caro Trí Tuệ Nhân Tạo (Gomoku)
               </h3>
 
               <p className="text-xs font-sans text-neutral-600 leading-relaxed">
-                Đấu trường xe tăng lập trình bắn súng sinh tồn. Viết logic điều khiển radar quét vị trí đối thủ, tính góc nòng súng bắn đón đầu và né đạn phản xạ từ tường chắn.
+                Đấu trí giải thuật đỉnh cao trên bàn cờ chuẩn 15x15. Tích hợp thuật toán Minimax kết hợp tỉa cành Alpha-Beta và bảng lượng giá thế cờ Heuristic, hỗ trợ 3 cấp độ AI và đấu 2 người.
               </p>
 
               <div className="text-[11px] font-mono text-neutral-500 space-y-1 pt-1">
-                <div>• Chế độ: <strong>Đấu vòng tròn & Sinh tồn</strong></div>
-                <div>• Cảm biến: <strong>Radar 360 độ</strong></div>
-                <div>• Trạng thái: <strong>Đang phát triển API</strong></div>
+                <div>• Thuật toán: <strong>Minimax + Alpha-Beta Pruning</strong></div>
+                <div>• Chế độ: <strong>Đấu với AI & 2 Người (PvP)</strong></div>
+                <div>• Hỗ trợ: <strong>Gợi ý nước đi & Đi lại (Undo)</strong></div>
               </div>
             </div>
 
             <div className="pt-4 border-t border-neutral-200">
-              <button
-                disabled
-                className="w-full py-2 border border-neutral-300 bg-neutral-100 text-neutral-400 text-xs font-mono font-bold uppercase cursor-not-allowed"
+              <Link
+                to="/caro"
+                className="block w-full py-2 bg-black text-white text-center text-xs font-mono font-bold uppercase hover:bg-neutral-800 transition"
               >
-                BẢN THỬ NGHIỆM (SẮP CÓ)
-              </button>
+                CHƠI CỜ CARO AI →
+              </Link>
             </div>
           </div>
 
-          {/* Game 3: Upcoming Autonomous Racing */}
-          <div className="border border-neutral-300 bg-neutral-50/70 p-6 flex flex-col justify-between space-y-4 hover:border-black transition">
+          {/* Game 3: Bridge Builder Physics */}
+          <div className="border-2 border-black bg-white p-6 flex flex-col justify-between space-y-4 hover:shadow-md transition">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 border border-neutral-400 text-neutral-600 uppercase">
-                  SẮP RA MẮT · ĐUA TỐC ĐỘ
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-emerald-600 text-white uppercase tracking-wider">
+                  MỚI RA MẮT · MÔ PHỎNG VẬT LÝ
                 </span>
                 <span className="text-xs font-mono text-neutral-400 font-bold">GAME #03</span>
               </div>
 
               <h3 className="text-xl font-bold uppercase text-black font-sans">
-                Đua Xe Tự Hành (Autonomous Cup)
+                Kỹ Sư Xây Cầu (Bridge Builder)
               </h3>
 
               <p className="text-xs font-sans text-neutral-600 leading-relaxed">
-                Đua xe thể thao tự hành trên sa hình đua F1. Thuật toán tối ưu hóa vận tốc cực đại ở đoạn thẳng và bộ điều khiển góc cua bám sát dây cung đường chạy (Apex Line).
+                Thiết kế kết cấu cầu chịu lực từ các nguyên vật liệu (mặt đường, dầm gỗ, khung thép, dây cáp). Tối ưu hóa chi phí ngân sách và thử tải thực tế bằng xe chuyển động 60 FPS.
               </p>
 
               <div className="text-[11px] font-mono text-neutral-500 space-y-1 pt-1">
-                <div>• Chế độ: <strong>Time Attack & Đua đối đầu</strong></div>
-                <div>• Điều khiển: <strong>Gia tốc & Góc lái PID</strong></div>
-                <div>• Trạng thái: <strong>Lên kế hoạch sa hình</strong></div>
+                <div>• Vật lý: <strong>Hệ dàn đàn hồi Hooke & Verlet Sub-steps</strong></div>
+                <div>• Đồ họa: <strong>Hiển thị đổi màu ứng suất nén/kéo</strong></div>
+                <div>• Mục tiêu: <strong>Đạt 3 sao tối ưu chi phí ngân sách</strong></div>
               </div>
             </div>
 
             <div className="pt-4 border-t border-neutral-200">
-              <button
-                disabled
-                className="w-full py-2 border border-neutral-300 bg-neutral-100 text-neutral-400 text-xs font-mono font-bold uppercase cursor-not-allowed"
+              <Link
+                to="/bridge"
+                className="block w-full py-2 bg-black text-white text-center text-xs font-mono font-bold uppercase hover:bg-neutral-800 transition"
               >
-                BẢN THỬ NGHIỆM (SẮP CÓ)
-              </button>
+                CHƠI XÂY CẦU VẬT LÝ →
+              </Link>
             </div>
           </div>
         </div>

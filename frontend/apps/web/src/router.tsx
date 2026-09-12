@@ -7,6 +7,8 @@ import { ChallengesView } from './features/challenges/ChallengesView';
 import { LeaderboardView } from './features/leaderboard/LeaderboardView';
 import { MultiplayerView } from './features/multiplayer/MultiplayerView';
 import { ProfileView } from './features/profile/ProfileView';
+import { CaroView } from './features/caro/CaroView';
+import { BridgeView } from './features/bridge/BridgeView';
 
 const RootErrorBoundary: React.FC = () => {
   const error = useRouteError() as Error;
@@ -52,6 +54,14 @@ export const router = createBrowserRouter([
       {
         path: 'online',
         element: <MultiplayerView />,
+      },
+      {
+        path: 'caro',
+        element: <CaroView />,
+      },
+      {
+        path: 'bridge',
+        element: <BridgeView />,
       },
       {
         path: 'editor',

@@ -10,7 +10,7 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-black font-sans selection:bg-black selection:text-white">
-      {/* Top Header - Streamlined, Responsive, Never Overflowing */}
+      {/* Top Header - Sharp Square, High Contrast, Minimalist */}
       <header className="sticky top-0 z-40 border-b border-black bg-white">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4">
           {/* Brand Logo */}
@@ -18,28 +18,28 @@ export const App: React.FC = () => {
             <img
               src="/logo.png"
               alt="RobotArena Logo"
-              className="w-8 h-8 object-contain rounded-sm group-hover:scale-105 transition-transform"
+              className="w-8 h-8 object-contain group-hover:scale-105 transition-transform"
             />
             <div className="flex items-baseline gap-1.5">
-              <h1 className="font-black text-lg sm:text-xl tracking-tight text-black font-sans uppercase">
+              <h1 className="font-black text-lg sm:text-xl tracking-tight text-neutral-950 font-sans uppercase">
                 RobotArena<span className="text-rose-600">.</span>
               </h1>
               <span className="text-[10px] font-mono tracking-wider text-neutral-400 uppercase hidden lg:inline">
-                Mê Cung
+                Arena Platform
               </span>
             </div>
           </Link>
 
           {/* Clean Primary Navigation */}
-          <nav className="flex items-center gap-1 sm:gap-2 text-xs font-mono font-bold uppercase overflow-hidden">
+          <nav className="hidden lg:flex items-center gap-1 text-xs font-mono font-bold uppercase">
             <NavLink
               to="/"
               end
               className={({ isActive }) =>
-                `px-2.5 py-1.5 transition border shrink-0 ${
+                `px-3 py-1.5 transition-colors ${
                   isActive
-                    ? 'border-black bg-black text-white'
-                    : 'border-transparent text-neutral-600 hover:text-black hover:border-black'
+                    ? 'bg-black text-white font-bold'
+                    : 'text-neutral-600 hover:text-black hover:bg-neutral-100'
                 }`
               }
             >
@@ -49,49 +49,68 @@ export const App: React.FC = () => {
             <NavLink
               to="/arena"
               className={({ isActive }) =>
-                `px-2.5 py-1.5 transition border shrink-0 ${
+                `px-3 py-1.5 transition-colors ${
                   isActive
-                    ? 'border-black bg-black text-white'
-                    : 'border-transparent text-neutral-600 hover:text-black hover:border-black'
+                    ? 'bg-black text-white font-bold'
+                    : 'text-neutral-600 hover:text-black hover:bg-neutral-100'
                 }`
               }
             >
-              Đấu Trường
+              Mê Cung
             </NavLink>
 
             <NavLink
               to="/online"
               className={({ isActive }) =>
-                `px-2.5 py-1.5 transition border shrink-0 ${
+                `px-3 py-1.5 transition-colors ${
                   isActive
-                    ? 'border-black bg-black text-white'
-                    : 'border-transparent text-neutral-600 hover:text-black hover:border-black'
+                    ? 'bg-black text-white font-bold'
+                    : 'text-neutral-600 hover:text-black hover:bg-neutral-100'
                 }`
               }
             >
-              Đấu Online (2-5)
+              Đấu Online
             </NavLink>
 
             <NavLink
-              to="/editor"
+              to="/caro"
               className={({ isActive }) =>
-                `px-2.5 py-1.5 transition border shrink-0 hidden md:inline-block ${
+                `px-3 py-1.5 transition-colors flex items-center gap-1.5 ${
                   isActive
-                    ? 'border-black bg-black text-white'
-                    : 'border-transparent text-neutral-600 hover:text-black hover:border-black'
+                    ? 'bg-black text-white font-bold'
+                    : 'text-neutral-600 hover:text-black hover:bg-neutral-100'
                 }`
               }
             >
-              Soạn Code
+              <span>Cờ Caro</span>
+              <span className="text-[9px] px-1 py-0.2 bg-rose-600 text-white font-mono">
+                AI
+              </span>
+            </NavLink>
+
+            <NavLink
+              to="/bridge"
+              className={({ isActive }) =>
+                `px-3 py-1.5 transition-colors flex items-center gap-1.5 ${
+                  isActive
+                    ? 'bg-black text-white font-bold'
+                    : 'text-neutral-600 hover:text-black hover:bg-neutral-100'
+                }`
+              }
+            >
+              <span>Xây Cầu</span>
+              <span className="text-[9px] px-1 py-0.2 bg-emerald-700 text-white font-mono">
+                Vật Lý
+              </span>
             </NavLink>
 
             <NavLink
               to="/leaderboard"
               className={({ isActive }) =>
-                `px-2.5 py-1.5 transition border shrink-0 ${
+                `px-3 py-1.5 transition-colors ${
                   isActive
-                    ? 'border-black bg-black text-white'
-                    : 'border-transparent text-neutral-600 hover:text-black hover:border-black'
+                    ? 'bg-black text-white font-bold'
+                    : 'text-neutral-600 hover:text-black hover:bg-neutral-100'
                 }`
               }
             >
@@ -102,7 +121,7 @@ export const App: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setShowMoreMenu(!showMoreMenu)}
-                className="px-2 py-1.5 border border-neutral-300 hover:border-black text-[11px] font-mono font-bold flex items-center gap-1 text-neutral-600 hover:text-black"
+                className="px-2.5 py-1.5 border border-black text-[11px] font-mono font-bold flex items-center gap-1 text-black transition-colors bg-white hover:bg-neutral-100"
                 title="Tính năng thêm"
               >
                 THÊM ▾
@@ -110,18 +129,18 @@ export const App: React.FC = () => {
 
               {showMoreMenu && (
                 <div
-                  className="absolute left-0 mt-1 w-44 bg-white border-2 border-black p-1 shadow-lg z-50 text-xs font-mono space-y-1"
+                  className="absolute left-0 mt-1 w-52 bg-white border border-black p-1 shadow-lg z-50 text-xs font-mono space-y-0.5"
                   onClick={() => setShowMoreMenu(false)}
                 >
                   <Link
                     to="/editor"
-                    className="block px-3 py-1.5 hover:bg-neutral-100 uppercase text-black font-bold md:hidden"
+                    className="block px-3 py-1.5 hover:bg-neutral-100 uppercase text-black font-bold transition-colors"
                   >
-                    Soạn thảo Code
+                    Soạn Code Monaco
                   </Link>
                   <Link
                     to="/challenges"
-                    className="block px-3 py-1.5 hover:bg-neutral-100 uppercase text-black font-bold"
+                    className="block px-3 py-1.5 hover:bg-neutral-100 uppercase text-black font-bold transition-colors"
                   >
                     Thử Thách Mê Cung
                   </Link>
@@ -129,14 +148,67 @@ export const App: React.FC = () => {
                     href={SWAGGER_URL}
                     target="_blank"
                     rel="noreferrer"
-                    className="block px-3 py-1.5 hover:bg-neutral-100 uppercase text-emerald-700 font-bold"
+                    className="block px-3 py-1.5 hover:bg-neutral-100 uppercase text-emerald-700 font-bold transition-colors"
                   >
-                    [REST] Swagger UI ↗
+                    Swagger UI ↗
                   </a>
                 </div>
               )}
             </div>
           </nav>
+
+          {/* Mobile Menu Dropdown Toggle for small/tablet screens */}
+          <div className="lg:hidden relative">
+            <button
+              onClick={() => setShowMoreMenu(!showMoreMenu)}
+              className="px-2.5 py-1.5 border border-black bg-neutral-50 text-xs font-mono font-bold uppercase flex items-center gap-1"
+            >
+              <span>MENU</span>
+              <span>▾</span>
+            </button>
+
+            {showMoreMenu && (
+              <div
+                className="absolute right-0 mt-1 w-56 bg-white border-2 border-black p-2 shadow-2xl z-50 text-xs font-mono space-y-1"
+                onClick={() => setShowMoreMenu(false)}
+              >
+                <Link to="/" className="block px-3 py-1.5 hover:bg-neutral-100 uppercase font-bold text-black">
+                  Trang Chủ
+                </Link>
+                <Link to="/arena" className="block px-3 py-1.5 hover:bg-neutral-100 uppercase font-bold text-black">
+                  Đấu Trường Mê Cung
+                </Link>
+                <Link to="/online" className="block px-3 py-1.5 hover:bg-neutral-100 uppercase font-bold text-black">
+                  Đua Online (2-5)
+                </Link>
+                <Link to="/caro" className="block px-3 py-1.5 hover:bg-neutral-100 uppercase font-bold text-rose-600 flex items-center justify-between">
+                  <span>Cờ Caro AI</span>
+                  <span className="text-[9px] px-1 bg-rose-600 text-white font-mono font-bold">MỚI</span>
+                </Link>
+                <Link to="/bridge" className="block px-3 py-1.5 hover:bg-neutral-100 uppercase font-bold text-emerald-700 flex items-center justify-between">
+                  <span>Kỹ Sư Xây Cầu</span>
+                  <span className="text-[9px] px-1 bg-emerald-600 text-white font-mono font-bold">MỚI</span>
+                </Link>
+                <Link to="/leaderboard" className="block px-3 py-1.5 hover:bg-neutral-100 uppercase font-bold text-black">
+                  Bảng Xếp Hạng
+                </Link>
+                <Link to="/editor" className="block px-3 py-1.5 hover:bg-neutral-100 uppercase font-bold text-black">
+                  Soạn Code Monaco
+                </Link>
+                <Link to="/challenges" className="block px-3 py-1.5 hover:bg-neutral-100 uppercase font-bold text-black">
+                  Thử Thách Mê Cung
+                </Link>
+                <a
+                  href={SWAGGER_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block px-3 py-1.5 hover:bg-neutral-100 uppercase font-bold text-neutral-500"
+                >
+                  Swagger UI ↗
+                </a>
+              </div>
+            )}
+          </div>
 
           {/* User Account / Profile Badge */}
           <div className="shrink-0 flex items-center gap-2">
@@ -194,16 +266,16 @@ export const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="RobotArena Logo" className="w-4 h-4 object-contain" />
-            <span>ROBOTARENA · HỆ THỐNG THI ĐẤU THUẬT TOÁN MÊ CUNG (.NET 10 + SQL SERVER)</span>
+            <span>ROBOTARENA · NỀN TẢNG THI ĐẤU THUẬT TOÁN ĐA NĂNG</span>
           </div>
           <div className="flex items-center gap-3 text-neutral-600">
-            <span>2-5 ĐẤU THỦ ONLINE</span>
+            <span>MÊ CUNG MULTIPLAYER</span>
             <span>·</span>
-            <span>10S CHỌN THUẬT TOÁN</span>
+            <span>CỜ CARO AI</span>
             <span>·</span>
-            <span>TÊN HIỆN 5S TRÊN CHUỘT</span>
+            <span>XÂY CẦU VẬT LÝ</span>
             <span>·</span>
-            <span>SIGNALR</span>
+            <span>.NET 10 + SIGNALR</span>
           </div>
         </div>
       </footer>

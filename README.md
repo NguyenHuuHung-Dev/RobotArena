@@ -23,6 +23,7 @@
     <img alt="TailwindCSS" src="https://img.shields.io/badge/Tailwind-3-06B6D4?logo=tailwindcss&logoColor=white" />
     <img alt="SQL Server" src="https://img.shields.io/badge/SQL_Server-2022-CC292B?logo=microsoftsqlserver&logoColor=white" />
     <img alt="SignalR" src="https://img.shields.io/badge/SignalR-Realtime-512BD4?logo=signalr&logoColor=white" />
+    <img alt="pnpm 12" src="https://img.shields.io/badge/pnpm-v12.4.1-F69220?logo=pnpm&logoColor=white" />
   </p>
 </div>
 
@@ -50,6 +51,8 @@ The project is architected as a modern monorepo combining a high-performance **.
 | --- | --- |
 | Multiplayer matches | Real-time room orchestration, 10-second algorithm selection lock, SignalR state broadcasting |
 | Algorithm catalog | Manhattan A*, Penalty-aware A*, Micromouse Flood Fill, Dijkstra, Greedy Best-First, Trémaux DFS Backtracking, Wall Follower |
+| Cờ Caro AI (Gomoku) | Minimax kết hợp Alpha-Beta Pruning, bộ lượng giá thế cờ Heuristic (5-in-a-row, Open 4, Blocked 4, Open 3), Candidate Move Pruning, 3 cấp độ AI & PvP |
+| Xây Cầu Vật Lý (Bridge Builder) | Mô phỏng kết cấu dàn phẳng (Truss System), Định luật đàn hồi Hooke & tích phân Verlet đa bước (Sub-steps), tính ứng suất nén/kéo động, trực quan hóa màu sắc (Xanh -> Đỏ -> Gãy), tối ưu ngân sách vật liệu (Road, Wood, Steel, Cable) |
 | Sensor simulation | Local wall proximity (`adjacentWalls`), viable unblocked cells (`availableNeighbors`), destination coordinate (`goal`) |
 | In-browser IDE | Embedded Monaco code editor with TypeScript autocompletion, live syntax diagnostics, and local storage persistence |
 | Leaderboard & stats | Comprehensive match history, step duration metrics (ms), ELO calculations, and SQL Server persistence |
@@ -138,9 +141,11 @@ RobotArena/
 │   ├── RobotArena.Simulation/     # Deterministic simulation tick engine
 │   └── RobotArena.Sandbox/        # Isolated script execution environment
 │
-├── frontend/                      # Monorepo pnpm workspace
+├── frontend/                      # Monorepo pnpm workspace (pnpm 12)
 │   ├── apps/
 │   │   └── web/                   # React 18 + Vite SPA, Monaco Editor, Tailwind
+│   │       ├── src/features/caro/   # Cờ Caro AI (Minimax Alpha-Beta, Heuristics, PvP)
+│   │       └── src/features/bridge/ # Kỹ Sư Xây Cầu Vật Lý (Truss Mechanics, Cost Optimizer)
 │   └── packages/
 │       ├── shared-types/          # Shared DTOs between Frontend & Backend
 │       ├── simulation-types/      # Sensor definitions, actions, match events

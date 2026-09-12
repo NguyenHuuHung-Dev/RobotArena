@@ -1,0 +1,58 @@
+import { MaterialDef, MaterialType } from './bridgeTypes';
+
+export const MATERIALS: Record<MaterialType, MaterialDef> = {
+  ROAD: {
+    type: 'ROAD',
+    name: 'Mặt Đường (Deck Road)',
+    description: 'Thanh mặt cầu chịu lực, có bề mặt bằng phẳng cho bánh xe di chuyển.',
+    costPerMeter: 180,
+    maxTension: 8000,
+    maxCompression: 8000,
+    stiffness: 15000,
+    damping: 38,
+    color: '#1e293b',
+    strokeWidth: 8,
+    isDriveable: true,
+  },
+  WOOD: {
+    type: 'WOOD',
+    name: 'Dầm Gỗ (Wood Truss)',
+    description: 'Vật liệu kinh tế giá rẻ, nhẹ, tối ưu chi phí dàn liên kết phụ trợ.',
+    costPerMeter: 90,
+    maxTension: 5500,
+    maxCompression: 5000,
+    stiffness: 8000,
+    damping: 28,
+    color: '#b45309',
+    strokeWidth: 5,
+    isDriveable: false,
+  },
+  STEEL: {
+    type: 'STEEL',
+    name: 'Khung Thép (Steel Girder)',
+    description: 'Thép hợp kim cường độ cao, chịu nén và kéo cực khủng cho nhịp chịu tải nặng.',
+    costPerMeter: 420,
+    maxTension: 20000,
+    maxCompression: 18000,
+    stiffness: 28000,
+    damping: 60,
+    color: '#0284c7',
+    strokeWidth: 6,
+    isDriveable: false,
+  },
+  CABLE: {
+    type: 'CABLE',
+    name: 'Dây Cáp Treo (Suspension Cable)',
+    description: 'Cực kỳ nhẹ, siêu bền khi kéo dãn, chịu nén = 0 (trùng dây khi bị ép).',
+    costPerMeter: 135,
+    maxTension: 24000,
+    maxCompression: 0.1,
+    stiffness: 18000,
+    damping: 22,
+    color: '#64748b',
+    strokeWidth: 3,
+    isDriveable: false,
+  },
+};
+
+export const PIXEL_PER_METER = 25; // 25 pixel tương đương 1 mét thực tế
